@@ -1,0 +1,38 @@
+[
+   {
+      "id": "1",
+      "ordenSellout": 10,
+      "category": "Electrónica",
+      "title": "TV Samsung 50\"",
+      "urlProduct": "https://example.com/productos/tv-samsung-50",
+      "urlImage": "https://example.com/imagenes/tv-samsung.jpg",
+      "startDate": "2025-05-01",
+      "endDate": "2025-05-15",
+      "offerState": "Activa",
+      "isProductHidden": false
+   },
+   {
+      "id": "2",
+      "ordenSellout": 20,
+      "category": "Hogar",
+      "title": "Refrigeradora LG 300L",
+      "urlProduct": "https://example.com/productos/refrigeradora-lg",
+      "urlImage": "https://example.com/imagenes/refrigeradora-lg.jpg",
+      "startDate": "2025-04-20",
+      "endDate": "2025-05-20",
+      "offerState": "Inactiva",
+      "isProductHidden": true
+   },
+   {
+      "id": "3",
+      "ordenSellout": 30,
+      "category": "Tecnología",
+      "title": "Laptop HP 14\" Ryzen 5",
+      "urlProduct": "https://example.com/productos/laptop-hp",
+      "urlImage": "https://example.com/imagenes/laptop-hp.jpg",
+      "startDate": "2025-05-10",
+      "endDate": "2025-06-10",
+      "offerState": "Activa",
+      "isProductHidden": false
+   }
+]
