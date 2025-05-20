@@ -10,6 +10,7 @@ function Header() {
       setActiveButton,
       showVisibleProducts,
       showHiddenProducts,
+      setPagination,
    } = useProducts()
 
    return (
@@ -29,6 +30,7 @@ function Header() {
                text={VIEW_LISTADO}
                functionOnClick={() => {
                   showVisibleProducts()
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }))
                   setActiveButton(VIEW_LISTADO)
                }}
                isActive={activeButton === VIEW_LISTADO}
@@ -38,11 +40,12 @@ function Header() {
                text={VIEW_OCULTOS}
                functionOnClick={() => {
                   showHiddenProducts()
+                  setPagination((prev) => ({ ...prev, pageIndex: 0 }))
                   setActiveButton(VIEW_OCULTOS)
                }}
                isActive={activeButton === VIEW_OCULTOS}
             />
-            <div className='pl-4 border-l-1 '>
+            <div className="pl-4 border-l-1 ">
                <DarkMode />
             </div>
          </div>

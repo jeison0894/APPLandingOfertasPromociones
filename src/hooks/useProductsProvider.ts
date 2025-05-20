@@ -37,6 +37,10 @@ export function useProductsProvider() {
    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
    const [editingProductId, setEditingProductId] = useState<string | null>(null)
    const [activeButton, setActiveButton] = useState<string>(VIEW_LISTADO)
+   const [pagination, setPagination] = useState({
+      pageIndex: 0,
+      pageSize: 25,
+   })
 
    const {
       register,
@@ -342,5 +346,7 @@ export function useProductsProvider() {
       activeButton,
       setActiveButton,
       handleUnhideProduct,
+      pagination,
+      setPagination
    }
 }
