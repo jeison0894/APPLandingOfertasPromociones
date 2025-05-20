@@ -295,7 +295,16 @@ export function useProductsProvider() {
       if (error) {
          console.error('Error al eliminar:', error)
       } else {
-         setProducts((prev) => prev.filter((product) => product.id !== ID))
+         const newlist = allProducts.filter((product) => product.id !== ID)
+         setAllProducts(newlist)
+
+         const filtered = newlist.filter((p) =>
+            activeButton === VIEW_LISTADO
+               ? !p.isProductHidden
+               : p.isProductHidden
+         )
+         setProducts(filtered)
+
          Sooner({
             message: 'Producto eliminado correctamente',
             soonerState: 'success',

@@ -22,7 +22,7 @@ export default function MenuButton({
    return (
       <Button
          className={`group ${
-            isActive ? 'text-white' : 'text-muted-foreground'
+            isActive ? '' : 'text-muted-foreground'
          }`}
          variant="ghost"
          onClick={functionOnClick}>
