@@ -21,11 +21,17 @@ import {
 } from '@/components/ui/alert-dialog'
 import type { Product } from '@/types/product'
 import { useProducts } from '@/hooks/useProducts'
+import { VIEW_LISTADO } from '@/constants/views'
 
 type Props = { productInfo: Product }
 
 export default function DropDownMenu({ productInfo }: Props) {
-   const { handleDeleteProduct, handlePrepareEdit } = useProducts()
+   const {
+      handleDeleteProduct,
+      handlePrepareEdit,
+      handleHideProduct,
+      activeButton,
+   } = useProducts()
    const [open, setOpen] = useState(false)
 
    const handleDeleteAndClose = async () => {
@@ -46,11 +52,21 @@ export default function DropDownMenu({ productInfo }: Props) {
             </Button>
          </DropdownMenuTrigger>
          <DropdownMenuContent>
-            {/* <DropdownMenuItem>Ver</DropdownMenuItem> */}
-            <DropdownMenuItem onClick={() => handlePrepareEdit(productInfo)}>
-               Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem>Ocultar</DropdownMenuItem>
+            {activeButton === VIEW_LISTADO ? (
+               <>
+                  <DropdownMenuItem
+                     onClick={() => handlePrepareEdit(productInfo)}>
+                     Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                     onClick={() => handleHideProduct(productInfo)}>
+                     Ocultar
+                  </DropdownMenuItem>
+               </>
+            ) : (
+               <DropdownMenuItem>Desocultar</DropdownMenuItem>
+            )}
+
             <DropdownMenuSeparator />
             <AlertDialog>
                <AlertDialogTrigger asChild>

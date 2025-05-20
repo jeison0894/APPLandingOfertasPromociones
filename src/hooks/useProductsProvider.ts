@@ -6,6 +6,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productFormSchema } from '@/lib/schemas/product.schema'
 import { parseDate } from '@internationalized/date'
+import { VIEW_LISTADO } from '@/constants/views'
 
 const defaultFormValues: ProductForm = {
    ordenSellout: '',
@@ -26,6 +27,7 @@ function formatDateToISO(date?: Date | string | null) {
 }
 
 export function useProductsProvider() {
+   const [allProducts, setAllProducts] = useState<Product[]>([])
    const [products, setProducts] = useState<Product[]>([])
    const [isloading, setIsloading] = useState(true)
    const [isloadingButton, setIsloadingButton] = useState(false)
@@ -34,6 +36,7 @@ export function useProductsProvider() {
    const [isEditing, setIsEditing] = useState(false)
    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
    const [editingProductId, setEditingProductId] = useState<string | null>(null)
+   const [activeButton, setActiveButton] = useState<string>(VIEW_LISTADO)
 
    const {
       register,
@@ -53,12 +56,58 @@ export function useProductsProvider() {
          if (error) {
             console.error('Error fetching products:', error)
          } else {
-            setProducts(data || [])
+            setAllProducts(data || [])
+            const visibles = (data || []).filter((p) => !p.isProductHidden)
+            setProducts(visibles)
          }
          setIsloading(false)
       }
       fetchProducts()
    }, [])
+
+   const showVisibleProducts = () => {
+      const visibles = allProducts.filter((p) => !p.isProductHidden)
+      setProducts(visibles)
+   }
+
+   const showHiddenProducts = () => {
+      const ocultos = allProducts.filter((p) => p.isProductHidden)
+      setProducts(ocultos)
+   }
+
+   const handleHideProduct = async (product: Product) => {
+      const { id } = product
+
+      const { error, data } = await supabase
+         .from('listProducts')
+         .update({
+            isProductHidden: true,
+            ordenSellout: null,
+         })
+         .eq('id', id)
+         .select()
+
+      if (error) {
+         console.error('Error al ocultar producto:', error)
+      } else if (data && data.length > 0) {
+         // Actualizar allProducts con el producto modificado
+         const updatedProduct = data[0]
+         const updatedAllProducts = allProducts.map((p) =>
+            p.id === id ? updatedProduct : p
+         )
+
+         setAllProducts(updatedAllProducts)
+
+         // Volver a mostrar solo los productos visibles
+         const visibles = updatedAllProducts.filter((p) => !p.isProductHidden)
+         setProducts(visibles)
+
+         Sooner({
+            message: 'Producto ocultado correctamente',
+            soonerState: 'success',
+         })
+      }
+   }
 
    const handleAddProduct = async (formData: ProductForm) => {
       setIsloadingButton(true)
@@ -224,5 +273,10 @@ export function useProductsProvider() {
       isDirty,
       showConfirmDialog,
       setShowConfirmDialog,
+      handleHideProduct,
+      showVisibleProducts,
+      showHiddenProducts,
+      activeButton,
+      setActiveButton,
    }
 }

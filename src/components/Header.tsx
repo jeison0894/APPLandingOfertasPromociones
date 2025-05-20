@@ -1,7 +1,17 @@
 import { SquareArrowOutUpRight } from 'lucide-react'
 import DarkMode from './DarkMode'
+import MenuButton from './MenuButton'
+import { useProducts } from '@/hooks/useProducts'
+import { VIEW_LISTADO, VIEW_OCULTOS } from '@/constants/views'
 
 function Header() {
+   const {
+      activeButton,
+      setActiveButton,
+      showVisibleProducts,
+      showHiddenProducts,
+   } = useProducts()
+
    return (
       <div className="flex items-center justify-between">
          <div className="flex items-center space-x-3 mt-4 mb-7">
@@ -13,6 +23,25 @@ function Header() {
                target="_blank">
                <SquareArrowOutUpRight className="h-4 w-4" />
             </a>
+         </div>
+         <div className="flex space-x-3">
+            <MenuButton
+               text={VIEW_LISTADO}
+               functionOnClick={() => {
+                  showVisibleProducts()
+                  setActiveButton(VIEW_LISTADO)
+               }}
+               isActive={activeButton === VIEW_LISTADO}
+            />
+
+            <MenuButton
+               text={VIEW_OCULTOS}
+               functionOnClick={() => {
+                  showHiddenProducts()
+                  setActiveButton(VIEW_OCULTOS)
+               }}
+               isActive={activeButton === VIEW_OCULTOS}
+            />
          </div>
          <DarkMode />
       </div>
