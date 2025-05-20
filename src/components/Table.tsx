@@ -66,12 +66,24 @@ export default function TableProducts() {
    return (
       <div>
          <div className="flex justify-between space-x-4">
-            <Search
-               value={(columnFilters[0]?.value as string) ?? ''}
-               onChange={(e) =>
-                  setColumnFilters([{ id: 'title', value: e.target.value }])
-               }
-            />
+            <div className="flex space-x-2.5">
+               <Search
+                  value={(columnFilters[0]?.value as string) ?? ''}
+                  onChange={(e) =>
+                     setColumnFilters([{ id: 'title', value: e.target.value }])
+                  }
+               />
+               {columnFilters[0].value != '' && (
+                  <Button
+                     variant={'outline'}
+                     onClick={() =>
+                        setColumnFilters([{ id: 'title', value: '' }])
+                     }>
+                     Limpiar
+                  </Button>
+               )}
+            </div>
+
             {activeButton === VIEW_LISTADO && (
                <Button
                   className="aspect-square max-sm:p-0 m-0"
