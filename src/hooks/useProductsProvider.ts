@@ -109,6 +109,60 @@ export function useProductsProvider() {
       }
    }
 
+   const handleUnhideProduct = async (product: Product) => {
+      const { id } = product
+
+      // Obtener el máximo ordenSellout entre los productos visibles
+      const { data: maxOrderData, error: maxOrderError } = await supabase
+         .from('listProducts')
+         .select('ordenSellout')
+         .not('isProductHidden', 'eq', true)
+         .order('ordenSellout', { ascending: false })
+         .limit(1)
+
+      if (maxOrderError) {
+         console.error('Error obteniendo máximo ordenSellout:', maxOrderError)
+         return
+      }
+
+      // Sacar el máximo ordenSellout, si no hay productos visibles usar 0
+      const maxOrdenSellout =
+         maxOrderData && maxOrderData.length > 0
+            ? maxOrderData[0].ordenSellout ?? 0
+            : 0
+
+      // Actualizar el producto para desocultarlo y ponerle el orden siguiente
+      const { error, data } = await supabase
+         .from('listProducts')
+         .update({
+            isProductHidden: false,
+            ordenSellout: maxOrdenSellout + 1,
+         })
+         .eq('id', id)
+         .select()
+
+      if (error) {
+         console.error('Error al desocultar producto:', error)
+      } else if (data && data.length > 0) {
+         const updatedProduct = data[0]
+         // Actualizar el estado global allProducts con el producto actualizado
+         const updatedAllProducts = allProducts.map((p) =>
+            p.id === id ? updatedProduct : p
+         )
+         setAllProducts(updatedAllProducts)
+
+         // Mostrar solo los productos visibles actualizados
+         const visibles = updatedAllProducts.filter((p) => !p.isProductHidden)
+         setProducts(visibles)
+         setActiveButton(VIEW_LISTADO)
+
+         Sooner({
+            message: 'Producto desocultado correctamente',
+            soonerState: 'success',
+         })
+      }
+   }
+
    const handleAddProduct = async (formData: ProductForm) => {
       setIsloadingButton(true)
       try {
@@ -278,5 +332,6 @@ export function useProductsProvider() {
       showHiddenProducts,
       activeButton,
       setActiveButton,
+      handleUnhideProduct,
    }
 }

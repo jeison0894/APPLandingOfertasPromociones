@@ -31,6 +31,7 @@ export default function DropDownMenu({ productInfo }: Props) {
       handlePrepareEdit,
       handleHideProduct,
       activeButton,
+      handleUnhideProduct,
    } = useProducts()
    const [open, setOpen] = useState(false)
 
@@ -61,10 +62,13 @@ export default function DropDownMenu({ productInfo }: Props) {
                   <DropdownMenuItem
                      onClick={() => handleHideProduct(productInfo)}>
                      Ocultar
-                  </DropdownMenuItem>
+                  </DropdownMenuItem>{' '}
                </>
             ) : (
-               <DropdownMenuItem>Desocultar</DropdownMenuItem>
+               <DropdownMenuItem
+                  onClick={() => handleUnhideProduct(productInfo)}>
+                  Desocultar
+               </DropdownMenuItem>
             )}
 
             <DropdownMenuSeparator />

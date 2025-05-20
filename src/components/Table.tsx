@@ -23,6 +23,7 @@ import { Drawer } from './Drawer'
 import { Button } from './ui/button'
 import { PlusIcon } from 'lucide-react'
 import Form from './Form'
+import { VIEW_LISTADO } from '@/constants/views'
 
 export default function TableProducts() {
    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
@@ -35,6 +36,7 @@ export default function TableProducts() {
       setOpenDrawer,
       setIsEditing,
       reset,
+      activeButton,
    } = useProducts()
 
    const table = useReactTable({
@@ -70,18 +72,19 @@ export default function TableProducts() {
                   setColumnFilters([{ id: 'title', value: e.target.value }])
                }
             />
-
-            <Button
-               variant="outline"
-               className="aspect-square max-sm:p-0 m-0"
-               onClick={handleAdd}>
-               <PlusIcon
-                  className="opacity-60 sm:-ms-1"
-                  size={16}
-                  aria-hidden="true"
-               />
-               <span className="max-sm:sr-only">Agregar Producto</span>
-            </Button>
+            {activeButton === VIEW_LISTADO && (
+               <Button
+                  variant="outline"
+                  className="aspect-square max-sm:p-0 m-0"
+                  onClick={handleAdd}>
+                  <PlusIcon
+                     className="opacity-60 sm:-ms-1"
+                     size={16}
+                     aria-hidden="true"
+                  />
+                  <span className="max-sm:sr-only">Agregar Producto</span>
+               </Button>
+            )}
 
             <Drawer isOpen={openDrawer} onClose={() => setOpenDrawer(false)}>
                <Form />
