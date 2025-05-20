@@ -74,7 +74,6 @@ export default function TableProducts() {
             />
             {activeButton === VIEW_LISTADO && (
                <Button
-                  variant="outline"
                   className="aspect-square max-sm:p-0 m-0"
                   onClick={handleAdd}>
                   <PlusIcon

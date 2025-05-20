@@ -24,7 +24,7 @@ function Header() {
                <SquareArrowOutUpRight className="h-4 w-4" />
             </a>
          </div>
-         <div className="flex space-x-3">
+         <div className="flex space-x-4">
             <MenuButton
                text={VIEW_LISTADO}
                functionOnClick={() => {
@@ -42,8 +42,10 @@ function Header() {
                }}
                isActive={activeButton === VIEW_OCULTOS}
             />
+            <div className='pl-4 border-l-1 '>
+               <DarkMode />
+            </div>
          </div>
-         <DarkMode />
       </div>
    )
 }
