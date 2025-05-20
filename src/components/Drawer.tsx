@@ -8,7 +8,12 @@ type DrawerProps = {
 }
 
 export function Drawer({ isOpen, children }: DrawerProps) {
-   const { isDirty, setOpenDrawer, setShowConfirmDialog } = useProducts()
+   const {
+      isDirty,
+      setOpenDrawer,
+      setShowConfirmDialog,
+      setIsFormOrderSelloutOpen,
+   } = useProducts()
 
    useEffect(() => {
       if (isOpen) {
@@ -26,6 +31,7 @@ export function Drawer({ isOpen, children }: DrawerProps) {
          setShowConfirmDialog(true)
       } else {
          setOpenDrawer(false)
+         setIsFormOrderSelloutOpen(false)
       }
    }
 

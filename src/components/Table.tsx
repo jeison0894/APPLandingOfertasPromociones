@@ -27,6 +27,7 @@ import { ArrowDown, ArrowUp, PlusIcon } from 'lucide-react'
 import Form from './Form'
 import { VIEW_LISTADO } from '@/constants/views'
 import TablePagination from './TablePagination'
+import FormMoveProduct from './FormMoveProduct'
 
 export default function TableProducts() {
    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([
@@ -45,6 +46,7 @@ export default function TableProducts() {
       setIsEditing,
       reset,
       activeButton,
+      isFormOrderSelloutOpen,
    } = useProducts()
 
    const table = useReactTable({
@@ -114,7 +116,7 @@ export default function TableProducts() {
             )}
 
             <Drawer isOpen={openDrawer} onClose={() => setOpenDrawer(false)}>
-               <Form />
+               {isFormOrderSelloutOpen ? <FormMoveProduct /> : <Form />}
             </Drawer>
          </div>
 

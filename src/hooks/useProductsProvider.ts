@@ -41,6 +41,7 @@ export function useProductsProvider() {
       pageIndex: 0,
       pageSize: 25,
    })
+   const [isFormOrderSelloutOpen, setIsFormOrderSelloutOpen] = useState(false)
 
    const {
       register,
@@ -316,6 +317,22 @@ export function useProductsProvider() {
       }
    }
 
+   const onSubmit = (data: ProductForm) => {
+      if (isEditing) {
+         handleEdit(data)
+      } else {
+         handleAddProduct(data)
+      }
+   }
+
+   const handleMoveProduct = (productInfo: Product) => {
+      setOpenDrawer(true)
+      setIsFormOrderSelloutOpen(true)
+      reset({
+         newOrdenSellout: productInfo.ordenSellout,
+      })
+   }
+
    return {
       products,
       setProducts,
@@ -347,6 +364,10 @@ export function useProductsProvider() {
       setActiveButton,
       handleUnhideProduct,
       pagination,
-      setPagination
+      setPagination,
+      onSubmit,
+      isFormOrderSelloutOpen,
+      setIsFormOrderSelloutOpen,
+      handleMoveProduct,
    }
 }

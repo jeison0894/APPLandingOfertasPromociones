@@ -15,28 +15,18 @@ import {
 } from 'react-aria-components'
 import { DateInput } from './ui/datefield-rac'
 import { Calendar } from '@/components/ui/calendar-rac'
-import type { ProductForm } from '@/types/product'
 
 export default function Form() {
    const {
       isloadingButton,
-      handleAddProduct,
-      handleEdit,
       errors,
       register,
       handleSubmit,
       Controller,
       control,
       isEditing,
+      onSubmit,
    } = useProducts()
-
-   const onSubmit = (data: ProductForm) => {
-      if (isEditing) {
-         handleEdit(data)
-      } else {
-         handleAddProduct(data)
-      }
-   }
 
    return (
       <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
@@ -86,7 +76,7 @@ export default function Form() {
                <option value="Calzado">Calzado</option>
                <option value="Belleza">Belleza</option>
                <option value="AccesoriosModa">Accesorios Moda</option>
-               <option value="hogHogarar">Hogar</option>
+               <option value="Hogar">Hogar</option>
                <option value="Deportes">Deportes</option>
                <option value="Otros">Otros</option>
             </SelectNative>
