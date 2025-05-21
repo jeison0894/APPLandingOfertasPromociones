@@ -1,5 +1,5 @@
 import Sooner from '@/components/Sooner'
-import type { Product, ProductForm } from '@/types/product'
+import type { Product, ProductForm, ProductToMove } from '@/types/product'
 import supabase from '@/utils/supabase'
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -42,6 +42,10 @@ export function useProductsProvider() {
       pageSize: 25,
    })
    const [isFormOrderSelloutOpen, setIsFormOrderSelloutOpen] = useState(false)
+   const [productToMove, setProductToMove] = useState<ProductToMove>({
+      id: '',
+      orderSellout: '0',
+   })
 
    const {
       register,
@@ -328,8 +332,9 @@ export function useProductsProvider() {
    const handleMoveProduct = (productInfo: Product) => {
       setOpenDrawer(true)
       setIsFormOrderSelloutOpen(true)
-      reset({
-         newOrdenSellout: productInfo.ordenSellout,
+      setProductToMove({
+         id: productInfo.id,
+         orderSellout: String(productInfo.ordenSellout),
       })
    }
 
@@ -369,5 +374,6 @@ export function useProductsProvider() {
       isFormOrderSelloutOpen,
       setIsFormOrderSelloutOpen,
       handleMoveProduct,
+      productToMove,
    }
 }
