@@ -52,3 +52,14 @@ export const productFormSchema = z.object({
    offerState: z.string().min(1, 'El estado de la oferta es obligatorio'),
    isProductHidden: z.boolean().optional(),
 })
+
+export const productToMoveSchema = z.object({
+   newOrdenSellout: z
+      .string()
+      .min(1, 'El orden sellout es obligatorio')
+      .max(3, 'Debe contener máximo 3 números')
+      .refine((val) => {
+         const num = Number(val)
+         return !isNaN(num) && num > 0 && Number.isInteger(num)
+      }, 'Debe ser un número entero positivo'),
+})

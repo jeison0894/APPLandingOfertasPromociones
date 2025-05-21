@@ -1,5 +1,5 @@
 import Sooner from '@/components/Sooner'
-import type { Product, ProductForm } from '@/types/product'
+import type { Product, ProductForm, ProductToMoveForm } from '@/types/product'
 import supabase from '@/utils/supabase'
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -42,6 +42,9 @@ export function useProductsProvider() {
       pageSize: 25,
    })
    const [isFormOrderSelloutOpen, setIsFormOrderSelloutOpen] = useState(false)
+   const [productToMove, setProductToMove] = useState<ProductToMoveForm>({
+      newOrdenSellout: 0,
+   })
 
    const {
       register,
@@ -57,20 +60,26 @@ export function useProductsProvider() {
 
    useEffect(() => {
       const fetchProducts = async () => {
-         const { data, error } = await supabase.from('listProducts').select('*')
+         const { data, error } = await supabase
+            .from('listProducts')
+            .select('*')
+            .order('ordenSellout', { ascending: true })
+
          if (error) {
             console.error('Error fetching products:', error)
          } else {
             setAllProducts(data || [])
             const visibles = (data || []).filter((p) => !p.isProductHidden)
-            setProducts(visibles)
+            setProducts(visibles) // ya vienen ordenados
          }
+
          setIsloading(false)
       }
       fetchProducts()
    }, [])
 
    const showVisibleProducts = () => {
+      console.log(products)
       const visibles = allProducts.filter((p) => !p.isProductHidden)
       setProducts(visibles)
    }
@@ -328,8 +337,9 @@ export function useProductsProvider() {
    const handleMoveProduct = (productInfo: Product) => {
       setOpenDrawer(true)
       setIsFormOrderSelloutOpen(true)
-      reset({
-         newOrdenSellout: productInfo.ordenSellout,
+      setProductToMove({
+         id: productInfo.id,
+         ordenSellout: productInfo.ordenSellout,
       })
    }
 
@@ -369,5 +379,6 @@ export function useProductsProvider() {
       isFormOrderSelloutOpen,
       setIsFormOrderSelloutOpen,
       handleMoveProduct,
+      productToMove,
    }
 }

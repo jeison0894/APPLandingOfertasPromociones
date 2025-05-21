@@ -31,7 +31,9 @@ export function Drawer({ isOpen, children }: DrawerProps) {
          setShowConfirmDialog(true)
       } else {
          setOpenDrawer(false)
-         setIsFormOrderSelloutOpen(false)
+         setTimeout(() => {
+            setIsFormOrderSelloutOpen(false)
+         }, 500)
       }
    }
 

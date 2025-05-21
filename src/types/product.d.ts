@@ -1,4 +1,4 @@
-import type { z } from "zod"
+import type { z } from 'zod'
 
 export type Product = {
    id?: string
@@ -12,5 +12,12 @@ export type Product = {
    offerState: string
    isProductHidden: boolean
 }
-
 export type ProductForm = z.infer<typeof productFormSchema>
+
+
+
+export type ProductToMove = {
+   id?: string
+   newOrdenSellout: string
+}
+export type ProductToMoveForm = z.infer<typeof productToMoveSchema>
