@@ -106,6 +106,7 @@ export function useProductsProvider() {
    const handleHideProduct = async (product: Product) => {
       const { id } = product
 
+      // 1. Ocultar el producto y dejar su ordenSellout en null
       const { error, data } = await supabase
          .from('listProducts')
          .update({
@@ -117,18 +118,44 @@ export function useProductsProvider() {
 
       if (error) {
          console.error('Error al ocultar producto:', error)
-      } else if (data && data.length > 0) {
-         // Actualizar allProducts con el producto modificado
+         return
+      }
+
+      if (data && data.length > 0) {
          const updatedProduct = data[0]
-         const updatedAllProducts = allProducts.map((p) =>
+
+         // 2. Actualizar localmente allProducts
+         let updatedAllProducts = allProducts.map((p) =>
             p.id === id ? updatedProduct : p
          )
 
-         setAllProducts(updatedAllProducts)
+         // 3. Obtener productos visibles y reordenarlos secuencialmente
+         const visiblesOrdenados = updatedAllProducts
+            .filter((p) => !p.isProductHidden)
+            .sort((a, b) => (a.ordenSellout ?? 0) - (b.ordenSellout ?? 0))
+            .map((p, index) => ({ ...p, ordenSellout: index + 1 }))
 
-         // Volver a mostrar solo los productos visibles
-         const visibles = updatedAllProducts.filter((p) => !p.isProductHidden)
-         setProducts(visibles)
+         // 4. Upsert masivo solo con productos visibles
+         const { error: upsertError } = await supabase
+            .from('listProducts')
+            .upsert(visiblesOrdenados, { onConflict: 'id' })
+
+         if (upsertError) {
+            console.error('Error al actualizar ordenSellout:', upsertError)
+            Sooner({
+               message: 'Error al reordenar productos',
+               soonerState: 'error',
+            })
+            return
+         }
+
+         // 5. Unir visibles actualizados + ocultos
+         const ocultos = updatedAllProducts.filter((p) => p.isProductHidden)
+         updatedAllProducts = [...visiblesOrdenados, ...ocultos]
+
+         // 6. Actualizar estados
+         setAllProducts(updatedAllProducts)
+         setProducts(visiblesOrdenados)
 
          Sooner({
             message: 'Producto ocultado correctamente',
