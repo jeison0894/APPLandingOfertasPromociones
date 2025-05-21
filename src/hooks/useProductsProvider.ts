@@ -45,7 +45,9 @@ export function useProductsProvider() {
    const [productToMove, setProductToMove] = useState<ProductToMove>({
       id: '',
       orderSellout: '0',
+      title: '',
    })
+   const [formIsDirty, setFormIsDirty] = useState<boolean>(false)
 
    const {
       register,
@@ -73,6 +75,10 @@ export function useProductsProvider() {
       }
       fetchProducts()
    }, [])
+
+   useEffect(() => {
+      setFormIsDirty(isDirty)
+   }, [isDirty])
 
    const showVisibleProducts = () => {
       const visibles = allProducts.filter((p) => !p.isProductHidden)
@@ -335,7 +341,18 @@ export function useProductsProvider() {
       setProductToMove({
          id: productInfo.id,
          orderSellout: String(productInfo.ordenSellout),
+         title: productInfo.title,
       })
+   }
+
+   const handleBackdropClick = () => {
+      if (formIsDirty) {
+         setShowConfirmDialog(true)
+      } else {
+         setOpenDrawer(false)
+         setFormIsDirty(false)
+         setIsFormOrderSelloutOpen(false)
+      }
    }
 
    return {
@@ -375,5 +392,8 @@ export function useProductsProvider() {
       setIsFormOrderSelloutOpen,
       handleMoveProduct,
       productToMove,
+      setAllProducts,
+      handleBackdropClick,
+      setFormIsDirty,
    }
 }

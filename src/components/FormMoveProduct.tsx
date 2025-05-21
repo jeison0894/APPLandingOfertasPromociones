@@ -3,18 +3,30 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LoaderProducts } from './LoaderProducts'
 import { useProducts } from '@/hooks/useProducts'
-import type { ProductForm, ProductToMoveForm } from '@/types/product'
+import type { ProductToMoveForm } from '@/types/product'
 import { productToMoveSchema } from '@/lib/schemas/product.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import supabase from '@/utils/supabase'
+import Sooner from './Sooner'
+import { useEffect } from 'react'
 
 export default function FormMoveProduct() {
-   const { isloadingButton, productToMove, products } = useProducts()
+   const {
+      isloadingButton,
+      productToMove,
+      products,
+      setProducts,
+      setAllProducts,
+      setIsFormOrderSelloutOpen,
+      setOpenDrawer,
+      setFormIsDirty,
+   } = useProducts()
 
    const {
       register,
       handleSubmit,
-      formState: { errors },
+      formState: { errors, isDirty },
    } = useForm<ProductToMoveForm>({
       resolver: zodResolver(productToMoveSchema),
       mode: 'onChange',
@@ -22,21 +34,85 @@ export default function FormMoveProduct() {
          newOrdenSellout: productToMove.orderSellout,
       },
    })
-   
-   const onSubmitMoveProduct = (data: ProductForm) => {
-      console.log(
-         data
-      ) /* contiene el nuevo ordersellout agregado en el input ej: {
-    "newOrdenSellout": "333"
-} */
-      console.log(
-         productToMove
-      ) /*  contiene el ordersellout que tiene actualmente la fila y su id:
-      {
-    "id": "a21c7f8b-1007-4000-9000-000700070007",
-    "orderSellout": "7"
-      }  */
-      console.log(products) // Contiene todo el listado de productos de la api
+
+   useEffect(() => {
+      setFormIsDirty(isDirty) 
+   }, [isDirty])
+
+   const onSubmitMoveProduct = async (data: ProductToMoveForm) => {
+      const newOrder = Number(data.newOrdenSellout)
+      const oldOrder = Number(productToMove.orderSellout)
+      const idToMove = productToMove.id
+
+      if (newOrder === oldOrder) {
+         Sooner({
+            message: 'El nuevo Orden Sellout no puede ser igual al actual',
+            soonerState: 'error',
+         })
+         return
+      }
+
+      if (!idToMove) return
+
+      // Copia productos para modificar sin mutar original
+      let updatedProducts = products.map((p) => ({ ...p }))
+
+      // Ajustar orden de productos afectados
+      updatedProducts = updatedProducts.map((p) => {
+         if (p.id === idToMove) {
+            return { ...p, ordenSellout: newOrder }
+         }
+
+         const movingUp = newOrder < oldOrder
+
+         if (
+            movingUp &&
+            p.ordenSellout >= newOrder &&
+            p.ordenSellout < oldOrder
+         ) {
+            return { ...p, ordenSellout: p.ordenSellout + 1 }
+         }
+
+         if (
+            !movingUp &&
+            p.ordenSellout > oldOrder &&
+            p.ordenSellout <= newOrder
+         ) {
+            return { ...p, ordenSellout: p.ordenSellout - 1 }
+         }
+
+         return p
+      })
+
+      // Hacer upsert masivo en Supabase
+      const { error } = await supabase
+         .from('listProducts')
+         .upsert(updatedProducts, { onConflict: 'id' })
+
+      if (error) {
+         console.error('Error al actualizar productos:', error)
+         Sooner({
+            message: 'Error al actualizar el orden de productos',
+            soonerState: 'error',
+         })
+      } else {
+         // Actualizar estado local con productos nuevos
+         setProducts(updatedProducts)
+         setAllProducts((prev) =>
+            prev.map((p) => {
+               const updated = updatedProducts.find((up) => up.id === p.id)
+               return updated ? updated : p
+            })
+         )
+
+         Sooner({
+            message: 'Orden actualizado correctamente',
+            soonerState: 'success',
+         })
+
+         setIsFormOrderSelloutOpen(false)
+         setOpenDrawer(false)
+      }
    }
 
    return (
@@ -44,6 +120,7 @@ export default function FormMoveProduct() {
          <h3 className="mb-5 font-bold border-b-1 pb-3">
             Cambiar Orden Sellout
          </h3>
+         <p className="text-xs text-muted-foreground">{productToMove.title}</p>
          <div className="*:not-first:mt-1 mb-3 w-full">
             <Label className="text-sm font-medium" htmlFor="newOrdenSellout">
                Nuevo Orden Sellout

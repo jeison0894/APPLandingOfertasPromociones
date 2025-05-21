@@ -35,11 +35,16 @@ export default function Form() {
          </h3>
          {/* Orden Sellout */}
          <div className="*:not-first:mt-1 mb-3 w-full">
-            <Label className="text-sm font-medium" htmlFor="ordenSellout">
+            <Label
+               className={`text-sm font-medium ${
+                  isEditing ? 'text-muted-foreground' : ''
+               }`}
+               htmlFor="ordenSellout">
                Orden Sellout
             </Label>
             <Input
-               className="peer w-full"
+               disabled={isEditing ? true : false}
+               className={`peer w-full ${isEditing ? 'text-muted-foreground' : ''}`}
                id="ordenSellout"
                placeholder="Ingresa el orden sellout"
                aria-invalid={!!errors.ordenSellout}

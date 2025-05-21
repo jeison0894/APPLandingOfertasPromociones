@@ -8,12 +8,7 @@ type DrawerProps = {
 }
 
 export function Drawer({ isOpen, children }: DrawerProps) {
-   const {
-      isDirty,
-      setOpenDrawer,
-      setShowConfirmDialog,
-      setIsFormOrderSelloutOpen,
-   } = useProducts()
+   const { handleBackdropClick } = useProducts()
 
    useEffect(() => {
       if (isOpen) {
@@ -25,15 +20,6 @@ export function Drawer({ isOpen, children }: DrawerProps) {
          document.body.style.overflow = ''
       }
    }, [isOpen])
-
-   const handleBackdropClick = () => {
-      if (isDirty) {
-         setShowConfirmDialog(true)
-      } else {
-         setOpenDrawer(false)
-         setIsFormOrderSelloutOpen(false)
-      }
-   }
 
    return (
       <>

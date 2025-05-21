@@ -17,5 +17,6 @@ export type ProductForm = z.infer<typeof productFormSchema>
 export type ProductToMove = {
    id?: string
    orderSellout: string
+   title: string
 }
 export type ProductToMoveForm = z.infer<typeof productToMoveSchema>
