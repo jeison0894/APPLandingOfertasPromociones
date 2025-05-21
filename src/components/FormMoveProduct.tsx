@@ -31,12 +31,12 @@ export default function FormMoveProduct() {
       resolver: zodResolver(productToMoveSchema),
       mode: 'onChange',
       defaultValues: {
-         newOrdenSellout: productToMove.orderSellout,
+         newOrdenSellout: null,
       },
    })
 
    useEffect(() => {
-      setFormIsDirty(isDirty) 
+      setFormIsDirty(isDirty)
    }, [isDirty])
 
    const onSubmitMoveProduct = async (data: ProductToMoveForm) => {
@@ -120,7 +120,9 @@ export default function FormMoveProduct() {
          <h3 className="mb-5 font-bold border-b-1 pb-3">
             Cambiar Orden Sellout
          </h3>
-         <p className="text-xs text-muted-foreground">{productToMove.title}</p>
+         <p className="text-xs text-muted-foreground">
+            {productToMove.orderSellout} - {productToMove.title}
+         </p>
          <div className="*:not-first:mt-1 mb-3 w-full">
             <Label className="text-sm font-medium" htmlFor="newOrdenSellout">
                Nuevo Orden Sellout

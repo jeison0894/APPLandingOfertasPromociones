@@ -8,18 +8,6 @@ import { productFormSchema } from '@/lib/schemas/product.schema'
 import { parseDate } from '@internationalized/date'
 import { VIEW_LISTADO } from '@/constants/views'
 
-const defaultFormValues: ProductForm = {
-   ordenSellout: '',
-   category: '',
-   title: '',
-   urlProduct: '',
-   urlImage: '',
-   startDate: undefined,
-   endDate: undefined,
-   offerState: '',
-   isProductHidden: false,
-}
-
 function formatDateToISO(date?: Date | string | null) {
    if (!date) return null
    if (typeof date === 'string') return date
@@ -48,6 +36,31 @@ export function useProductsProvider() {
       title: '',
    })
    const [formIsDirty, setFormIsDirty] = useState<boolean>(false)
+
+   function getNextOrdenSellout(products: Product[]): number {
+      if (products.length === 0) return 1 // Si no hay productos, empieza en 1
+
+      // Suponiendo que ordenSellout es número y está en cada producto
+      // Buscamos el máximo ordenSellout entre los productos
+      const maxOrden = Math.max(
+         ...products.map((p) => Number(p.ordenSellout) || 0)
+      )
+      return maxOrden + 1
+   }
+
+   const nextOrdenSellout = getNextOrdenSellout(products)
+
+   const defaultFormValues: ProductForm = {
+      ordenSellout: 0,
+      category: '',
+      title: '',
+      urlProduct: '',
+      urlImage: '',
+      startDate: undefined,
+      endDate: undefined,
+      offerState: '',
+      isProductHidden: false,
+   }
 
    const {
       register,
@@ -176,6 +189,22 @@ export function useProductsProvider() {
             soonerState: 'success',
          })
       }
+   }
+
+   const handleAdd = () => {
+      reset({
+         ordenSellout: nextOrdenSellout,
+         category: '',
+         title: '',
+         urlProduct: '',
+         urlImage: '',
+         startDate: undefined,
+         endDate: undefined,
+         offerState: '',
+         isProductHidden: false,
+      })
+      setOpenDrawer(true)
+      setIsEditing(false)
    }
 
    const handleAddProduct = async (formData: ProductForm) => {
@@ -395,5 +424,6 @@ export function useProductsProvider() {
       setAllProducts,
       handleBackdropClick,
       setFormIsDirty,
+      handleAdd,
    }
 }

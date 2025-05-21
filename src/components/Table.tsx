@@ -43,8 +43,7 @@ export default function TableProducts() {
       isloading,
       openDrawer,
       setOpenDrawer,
-      setIsEditing,
-      reset,
+      handleAdd,
       activeButton,
       isFormOrderSelloutOpen,
    } = useProducts()
@@ -64,22 +63,6 @@ export default function TableProducts() {
       getSortedRowModel: getSortedRowModel(),
       getPaginationRowModel: getPaginationRowModel(),
    })
-
-   const handleAdd = () => {
-      reset({
-         ordenSellout: '',
-         category: '',
-         title: '',
-         urlProduct: '',
-         urlImage: '',
-         startDate: undefined,
-         endDate: undefined,
-         offerState: '',
-         isProductHidden: false,
-      })
-      setOpenDrawer(true)
-      setIsEditing(false)
-   }
 
    return (
       <div>
