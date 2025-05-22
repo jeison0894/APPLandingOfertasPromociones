@@ -17,7 +17,7 @@ function formatDateToISO(date?: Date | string | null) {
 export function useProductsProvider() {
    const [allProducts, setAllProducts] = useState<Product[]>([])
    const [products, setProducts] = useState<Product[]>([])
-   const [isLoading, setIsloading] = useState(true)
+   const [isloading, setIsloading] = useState(true)
    const [isloadingButton, setIsloadingButton] = useState(false)
    const [isModalOpen, setIsModalOpen] = useState(false)
    const [openDrawer, setOpenDrawer] = useState(false)
@@ -418,7 +418,7 @@ export function useProductsProvider() {
       handlePrepareEdit,
       handleEdit,
       handleDeleteProduct,
-      isLoading,
+      isloading,
       isloadingButton,
       errors,
       register,
