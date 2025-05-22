@@ -5,7 +5,6 @@ export interface TableHeader {
    columnFilters: ColumnFiltersState
    setColumnFilters: React.Dispatch<React.SetStateAction<ColumnFiltersState>>
    activeButton: string
-   handleAdd: () => void
    openDrawer: boolean
    setOpenDrawer: React.Dispatch<React.SetStateAction<boolean>>
    isFormOrderSelloutOpen: boolean

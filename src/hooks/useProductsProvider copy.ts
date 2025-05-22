@@ -1,5 +1,4 @@
-import Sonner from '@/components/Sonner'
-import type { Product, ProductForm, ProductToMove } from '@/types/product'
+/* import type { Product, ProductForm, ProductToMove } from '@/types/product'
 import supabase from '@/utils/supabase'
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
@@ -7,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { productFormSchema } from '@/lib/schemas/product.schema'
 import { parseDate } from '@internationalized/date'
 import { VIEW_LISTADO } from '@/constants/views'
+import Sonner from '@/components/Sonner'
 
 function formatDateToISO(date?: Date | string | null) {
    if (!date) return null
@@ -218,7 +218,7 @@ export function useProductsProvider() {
       }
    }
 
-   const handleAdd = () => {
+   const handleAddProductClick  = () => {
       reset({
          orderSellout: nextorderSellout,
          category: '',
@@ -234,7 +234,7 @@ export function useProductsProvider() {
       setIsEditing(false)
    }
 
-   const handleAddProduct = async (formData: ProductForm) => {
+   const handleAddProductClick ProductSubmit = async (formData: ProductForm) => {
       setIsloadingButton(true)
       try {
          const dataToSend = {
@@ -387,7 +387,7 @@ export function useProductsProvider() {
       if (isEditing) {
          handleEdit(data)
       } else {
-         handleAddProduct(data)
+         handleAddProductClick ProductSubmit(data)
       }
    }
 
@@ -414,7 +414,7 @@ export function useProductsProvider() {
    return {
       products,
       setProducts,
-      handleAddProduct,
+      handleAddProductClick ProductSubmit,
       handlePrepareEdit,
       handleEdit,
       handleDeleteProduct,
@@ -451,6 +451,7 @@ export function useProductsProvider() {
       setAllProducts,
       handleBackdropClick,
       setFormIsDirty,
-      handleAdd,
+      handleAddProductClick ,
    }
 }
+ */

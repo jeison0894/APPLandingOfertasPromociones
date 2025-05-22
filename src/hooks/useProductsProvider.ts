@@ -1,4 +1,3 @@
-import Sonner from '@/components/Sonner'
 import type { Product, ProductForm, ProductToMove } from '@/types/product'
 import supabase from '@/utils/supabase'
 import { useEffect, useState } from 'react'
@@ -7,12 +6,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { productFormSchema } from '@/lib/schemas/product.schema'
 import { parseDate } from '@internationalized/date'
 import { VIEW_LISTADO } from '@/constants/views'
-
-function formatDateToISO(date?: Date | string | null) {
-   if (!date) return null
-   if (typeof date === 'string') return date
-   return date.toISOString().split('T')[0]
-}
+import Sonner from '@/components/Sonner'
+import { addProduct, getAllProducts } from '@/api/products'
+import { isPostgresError } from '@/utils/errorHelpers'
+import { formatDateToISO } from '@/utils/formatDate'
+import { formatProductDates, getVisibleProducts } from '@/utils/product.utils'
 
 export function useProductsProvider() {
    const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -36,19 +34,6 @@ export function useProductsProvider() {
       title: '',
    })
    const [formIsDirty, setFormIsDirty] = useState<boolean>(false)
-
-   function getNextorderSellout(products: Product[]): number {
-      if (products.length === 0) return 1 // Si no hay productos, empieza en 1
-
-      // Suponiendo que orderSellout es número y está en cada producto
-      // Buscamos el máximo orderSellout entre los productos
-      const maxOrden = Math.max(
-         ...products.map((p) => Number(p.orderSellout) || 0)
-      )
-      return maxOrden + 1
-   }
-
-   const nextorderSellout = getNextorderSellout(products)
 
    const defaultFormValues: ProductForm = {
       orderSellout: 0,
@@ -75,32 +60,44 @@ export function useProductsProvider() {
    })
 
    useEffect(() => {
-      const fetchProducts = async () => {
-         const { data, error } = await supabase.from('listProducts').select('*')
-         if (error) {
-            console.error('Error fetching products:', error)
-         } else {
-            setAllProducts(data || [])
-            const visibles = (data || []).filter((p) => !p.isProductHidden)
-            setProducts(visibles)
+      const fetch = async () => {
+         try {
+            const data = await getAllProducts()
+            setAllProducts(data)
+            setProducts(() => getVisibleProducts(data))
+         } catch (error) {
+            console.error('Error cargando los productos:', error)
+         } finally {
+            setIsloading(false)
          }
-         setIsloading(false)
       }
-      fetchProducts()
+      fetch()
    }, [])
 
    useEffect(() => {
       setFormIsDirty(isDirty)
    }, [isDirty])
 
-   const showVisibleProducts = () => {
-      const visibles = allProducts.filter((p) => !p.isProductHidden)
-      setProducts(visibles)
-   }
-
-   const showHiddenProducts = () => {
-      const ocultos = allProducts.filter((p) => p.isProductHidden)
-      setProducts(ocultos)
+   const handleAddProductSubmit = async (formData: ProductForm) => {
+      setIsloadingButton(true)
+      try {
+         const dataToSend = formatProductDates(formData)
+         const data = await addProduct(dataToSend)
+         setProducts((prev) => [...prev, data[0]])
+         setIsModalOpen(false)
+         setOpenDrawer(false)
+      } catch (error: unknown) {
+         if (error instanceof Error) {
+            if (isPostgresError(error) && error.code === '23505') {
+               Sonner({
+                  message: 'Este orden sellout ya existe en la lista',
+                  sonnerState: 'error',
+               })
+            }
+         } else {
+            console.error('Error desconocido', error)
+         }
+      }
    }
 
    const handleHideProduct = async (product: Product) => {
@@ -215,59 +212,6 @@ export function useProductsProvider() {
             message: 'Producto desocultado correctamente',
             sonnerState: 'success',
          })
-      }
-   }
-
-   const handleAdd = () => {
-      reset({
-         orderSellout: nextorderSellout,
-         category: '',
-         title: '',
-         urlProduct: '',
-         urlImage: '',
-         startDate: undefined,
-         endDate: undefined,
-         offerState: '',
-         isProductHidden: false,
-      })
-      setOpenDrawer(true)
-      setIsEditing(false)
-   }
-
-   const handleAddProduct = async (formData: ProductForm) => {
-      setIsloadingButton(true)
-      try {
-         const dataToSend = {
-            ...formData,
-            startDate: formatDateToISO(formData.startDate),
-            endDate: formatDateToISO(formData.endDate),
-         }
-
-         const { data, error } = await supabase
-            .from('listProducts')
-            .insert([dataToSend])
-            .select()
-
-         if (error && error.code === '23505') {
-            Sonner({
-               message: 'Este orden sellout ya existe en la lista',
-               sonnerState: 'error',
-            })
-            return
-         }
-
-         if (data) {
-            setProducts((prev) => [...prev, data[0]])
-            setIsModalOpen(false)
-            setOpenDrawer(false)
-            Sonner({
-               message: 'Producto agregado correctamente',
-               sonnerState: 'success',
-            })
-            reset(defaultFormValues)
-         }
-      } finally {
-         setIsloadingButton(false)
       }
    }
 
@@ -387,7 +331,7 @@ export function useProductsProvider() {
       if (isEditing) {
          handleEdit(data)
       } else {
-         handleAddProduct(data)
+         handleAddProductSubmit(data)
       }
    }
 
@@ -414,7 +358,7 @@ export function useProductsProvider() {
    return {
       products,
       setProducts,
-      handleAddProduct,
+      handleAddProductSubmit,
       handlePrepareEdit,
       handleEdit,
       handleDeleteProduct,
@@ -436,8 +380,6 @@ export function useProductsProvider() {
       showConfirmDialog,
       setShowConfirmDialog,
       handleHideProduct,
-      showVisibleProducts,
-      showHiddenProducts,
       activeButton,
       setActiveButton,
       handleUnhideProduct,
@@ -451,6 +393,6 @@ export function useProductsProvider() {
       setAllProducts,
       handleBackdropClick,
       setFormIsDirty,
-      handleAdd,
+      allProducts,
    }
 }

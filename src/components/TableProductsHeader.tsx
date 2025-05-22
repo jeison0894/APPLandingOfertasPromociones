@@ -6,16 +6,27 @@ import Form from './Form'
 import { VIEW_LISTADO } from '@/constants/views'
 import FormMoveProduct from './FormMoveProduct'
 import type { TableHeader } from '@/types/table'
+import { useProducts } from '@/hooks/useProducts'
+import {
+   getNextorderSellout,
+   getDefaultAddProductForm,
+} from '@/utils/product.utils'
 
 export default function TableProductsHeader({
    columnFilters,
    setColumnFilters,
    activeButton,
-   handleAdd,
-   openDrawer,
-   setOpenDrawer,
    isFormOrderSelloutOpen,
 }: TableHeader) {
+   const { products, reset, setIsEditing, setOpenDrawer, openDrawer } = useProducts()
+
+   const handleAddProductClick = () => {
+      const nextorderSellout = getNextorderSellout(products)
+      reset(getDefaultAddProductForm(nextorderSellout))
+      setOpenDrawer(true)
+      setIsEditing(false)
+   }
+
    return (
       <div className="flex justify-between space-x-4">
          <div className="flex space-x-2.5">
@@ -39,7 +50,7 @@ export default function TableProductsHeader({
          {activeButton === VIEW_LISTADO && (
             <Button
                className="aspect-square max-sm:p-0 m-0"
-               onClick={handleAdd}>
+               onClick={handleAddProductClick}>
                <PlusIcon
                   className="opacity-60 sm:-ms-1"
                   size={16}

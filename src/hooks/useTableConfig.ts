@@ -27,7 +27,6 @@ export function useTableConfig() {
       isLoading,
       openDrawer,
       setOpenDrawer,
-      handleAdd,
       activeButton,
       isFormOrderSelloutOpen,
    } = useProducts()
@@ -53,7 +52,6 @@ export function useTableConfig() {
       isLoading,
       openDrawer,
       setOpenDrawer,
-      handleAdd,
       activeButton,
       isFormOrderSelloutOpen,
       pagination,

@@ -8,8 +8,8 @@ import { productToMoveSchema } from '@/lib/schemas/product.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import supabase from '@/utils/supabase'
-import Sonner from './Sonner'
 import { useEffect } from 'react'
+import Sonner from './Sonner'
 
 export default function FormMoveProduct() {
    const {

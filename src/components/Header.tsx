@@ -3,14 +3,15 @@ import DarkMode from './DarkMode'
 import MenuButton from './MenuButton'
 import { useProducts } from '@/hooks/useProducts'
 import { VIEW_LISTADO, VIEW_OCULTOS } from '@/constants/views'
+import { getHiddenProducts, getVisibleProducts } from '@/utils/product.utils'
 
 function Header() {
    const {
+      allProducts,
       activeButton,
       setActiveButton,
-      showVisibleProducts,
-      showHiddenProducts,
       setPagination,
+      setProducts,
    } = useProducts()
 
    return (
@@ -29,7 +30,8 @@ function Header() {
             <MenuButton
                text={VIEW_LISTADO}
                functionOnClick={() => {
-                  showVisibleProducts()
+                  const visibles = getVisibleProducts(allProducts)
+                  setProducts(visibles)
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }))
                   setActiveButton(VIEW_LISTADO)
                }}
@@ -39,7 +41,8 @@ function Header() {
             <MenuButton
                text={VIEW_OCULTOS}
                functionOnClick={() => {
-                  showHiddenProducts()
+                  const hidden = getHiddenProducts(allProducts)
+                  setProducts(hidden)
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }))
                   setActiveButton(VIEW_OCULTOS)
                }}

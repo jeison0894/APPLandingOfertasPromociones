@@ -10,7 +10,6 @@ export default function TableProducts() {
       isLoading,
       openDrawer,
       setOpenDrawer,
-      handleAdd,
       activeButton,
       isFormOrderSelloutOpen,
       setPagination,
@@ -24,7 +23,6 @@ export default function TableProducts() {
             columnFilters={columnFilters}
             setColumnFilters={setColumnFilters}
             activeButton={activeButton}
-            handleAdd={handleAdd}
             openDrawer={openDrawer}
             setOpenDrawer={setOpenDrawer}
             isFormOrderSelloutOpen={isFormOrderSelloutOpen}
