@@ -24,7 +24,7 @@ export function getNextorderSellout(products: Product[]): number {
 
 export function getDefaultAddProductForm(nextorderSellout: number) {
    return {
-      orderSellout: nextorderSellout,
+      orderSellout: String(nextorderSellout),
       category: '',
       title: '',
       urlProduct: '',

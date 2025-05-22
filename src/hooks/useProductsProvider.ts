@@ -86,6 +86,10 @@ export function useProductsProvider() {
          setProducts((prev) => [...prev, data[0]])
          setIsModalOpen(false)
          setOpenDrawer(false)
+         Sonner({
+            message: 'Producto agregado correctamente',
+            sonnerState: 'success',
+         })
       } catch (error: unknown) {
          if (error instanceof Error) {
             if (isPostgresError(error) && error.code === '23505') {
@@ -97,6 +101,8 @@ export function useProductsProvider() {
          } else {
             console.error('Error desconocido', error)
          }
+      } finally {
+         setIsloadingButton(false)
       }
    }
 
