@@ -8,7 +8,7 @@ import { productToMoveSchema } from '@/lib/schemas/product.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import supabase from '@/utils/supabase'
-import Sooner from './Sooner'
+import Sonner from './Sonner'
 import { useEffect } from 'react'
 
 export default function FormMoveProduct() {
@@ -31,7 +31,7 @@ export default function FormMoveProduct() {
       resolver: zodResolver(productToMoveSchema),
       mode: 'onChange',
       defaultValues: {
-         newOrdenSellout: null,
+         neworderSellout: null,
       },
    })
 
@@ -40,14 +40,14 @@ export default function FormMoveProduct() {
    }, [isDirty])
 
    const onSubmitMoveProduct = async (data: ProductToMoveForm) => {
-      const newOrder = Number(data.newOrdenSellout)
+      const newOrder = Number(data.neworderSellout)
       const oldOrder = Number(productToMove.orderSellout)
       const idToMove = productToMove.id
 
       if (newOrder === oldOrder) {
-         Sooner({
+         Sonner({
             message: 'El nuevo Orden Sellout no puede ser igual al actual',
-            soonerState: 'error',
+            sonnerState: 'error',
          })
          return
       }
@@ -60,25 +60,25 @@ export default function FormMoveProduct() {
       // Ajustar orden de productos afectados
       updatedProducts = updatedProducts.map((p) => {
          if (p.id === idToMove) {
-            return { ...p, ordenSellout: newOrder }
+            return { ...p, orderSellout: newOrder }
          }
 
          const movingUp = newOrder < oldOrder
 
          if (
             movingUp &&
-            p.ordenSellout >= newOrder &&
-            p.ordenSellout < oldOrder
+            p.orderSellout >= newOrder &&
+            p.orderSellout < oldOrder
          ) {
-            return { ...p, ordenSellout: p.ordenSellout + 1 }
+            return { ...p, orderSellout: p.orderSellout + 1 }
          }
 
          if (
             !movingUp &&
-            p.ordenSellout > oldOrder &&
-            p.ordenSellout <= newOrder
+            p.orderSellout > oldOrder &&
+            p.orderSellout <= newOrder
          ) {
-            return { ...p, ordenSellout: p.ordenSellout - 1 }
+            return { ...p, orderSellout: p.orderSellout - 1 }
          }
 
          return p
@@ -91,9 +91,9 @@ export default function FormMoveProduct() {
 
       if (error) {
          console.error('Error al actualizar productos:', error)
-         Sooner({
+         Sonner({
             message: 'Error al actualizar el orden de productos',
-            soonerState: 'error',
+            sonnerState: 'error',
          })
       } else {
          // Actualizar estado local con productos nuevos
@@ -105,9 +105,9 @@ export default function FormMoveProduct() {
             })
          )
 
-         Sooner({
+         Sonner({
             message: 'Orden actualizado correctamente',
-            soonerState: 'success',
+            sonnerState: 'success',
          })
 
          setIsFormOrderSelloutOpen(false)
@@ -124,22 +124,22 @@ export default function FormMoveProduct() {
             {productToMove.orderSellout} - {productToMove.title}
          </p>
          <div className="*:not-first:mt-1 mb-3 w-full">
-            <Label className="text-sm font-medium" htmlFor="newOrdenSellout">
+            <Label className="text-sm font-medium" htmlFor="neworderSellout">
                Nuevo Orden Sellout
             </Label>
             <Input
                className="peer w-full"
-               id="newOrdenSellout"
+               id="neworderSellout"
                placeholder="Ingresa el nuevo orden sellout"
-               aria-invalid={!!errors.newOrdenSellout}
-               {...register('newOrdenSellout')}
+               aria-invalid={!!errors.neworderSellout}
+               {...register('neworderSellout')}
             />
-            {errors.newOrdenSellout && (
+            {errors.neworderSellout && (
                <p
                   className="peer-aria-invalid:text-destructive mt-2 text-xs"
                   role="alert"
                   aria-live="polite">
-                  {errors.newOrdenSellout.message}
+                  {errors.neworderSellout.message}
                </p>
             )}
          </div>

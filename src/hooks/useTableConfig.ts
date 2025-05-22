@@ -17,7 +17,7 @@ export function useTableConfig() {
       { id: FILTER, value: '' },
    ])
    const [sorting, setSorting] = useState<SortingState>([
-      { id: 'ordenSellout', desc: false },
+      { id: 'orderSellout', desc: false },
    ])
 
    const {

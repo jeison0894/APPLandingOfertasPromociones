@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const productFormSchema = z.object({
-   ordenSellout: z
+   orderSellout: z
       .string()
       .min(1, 'El orden sellout es obligatorio')
       .max(3, 'Debe contener máximo 3 números')
@@ -54,7 +54,7 @@ export const productFormSchema = z.object({
 })
 
 export const productToMoveSchema = z.object({
-   newOrdenSellout: z
+   neworderSellout: z
       .string()
       .min(1, 'El orden sellout es obligatorio')
       .max(3, 'Debe contener máximo 3 números')

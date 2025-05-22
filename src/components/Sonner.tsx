@@ -2,9 +2,9 @@ import { CircleCheckIcon, CircleX, TriangleAlert, XIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 
-type SoonerConfig = {
+type SonnerConfig = {
    message: string
-   soonerState: 'success' | 'warning' | 'error'
+   sonnerState: 'success' | 'warning' | 'error'
 }
 
 const colorMap = {
@@ -19,15 +19,15 @@ const iconMap = {
    error: CircleX,
 }
 
-export default function Sooner({ message, soonerState }: SoonerConfig) {
-   const Icon = iconMap[soonerState]
+export default function Sonner({ message, sonnerState }: SonnerConfig) {
+   const Icon = iconMap[sonnerState]
 
    return toast.custom((t) => (
       <div className="bg-background text-foreground w-full rounded-md border px-4 py-3 shadow-lg sm:w-[var(--width)]">
          <div className="flex gap-2">
             <div className="flex grow gap-3">
                <Icon
-                  className={`mt-0.5 shrink-0 ${colorMap[soonerState]}`}
+                  className={`mt-0.5 shrink-0 ${colorMap[sonnerState]}`}
                   size={16}
                   aria-hidden="true"
                />

@@ -6,9 +6,9 @@ export function formatDateToISO(date?: Date | string | null): string | null {
    return typeof date === 'string' ? date : date.toISOString().split('T')[0]
 }
 
-export function getNextOrdenSellout(products: Product[]): number {
+export function getNextorderSellout(products: Product[]): number {
    if (products.length === 0) return 1
-   return Math.max(...products.map((p) => Number(p.ordenSellout) || 0)) + 1
+   return Math.max(...products.map((p) => Number(p.orderSellout) || 0)) + 1
 }
 
 export function filterVisibleProducts(products: Product[]) {

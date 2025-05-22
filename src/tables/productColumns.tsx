@@ -5,7 +5,7 @@ import { SquareArrowOutUpRight } from 'lucide-react'
 
 export const columns: ColumnDef<Product>[] = [
    {
-      accessorKey: 'ordenSellout',
+      accessorKey: 'orderSellout',
       header: 'Orden Sellout',
       enableSorting: true,
    },
@@ -65,4 +65,3 @@ export const columns: ColumnDef<Product>[] = [
       },
    },
 ]
-

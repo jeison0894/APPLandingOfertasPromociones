@@ -2,7 +2,7 @@ import type { z } from 'zod'
 
 export type Product = {
    id?: string
-   ordenSellout: number
+   orderSellout: number
    category: string
    title: string
    urlProduct: string

@@ -1,4 +1,4 @@
-import Sooner from '@/components/Sooner'
+import Sonner from '@/components/Sonner'
 import type { Product, ProductForm, ProductToMove } from '@/types/product'
 import supabase from '@/utils/supabase'
 import { useEffect, useState } from 'react'
@@ -37,21 +37,21 @@ export function useProductsProvider() {
    })
    const [formIsDirty, setFormIsDirty] = useState<boolean>(false)
 
-   function getNextOrdenSellout(products: Product[]): number {
+   function getNextorderSellout(products: Product[]): number {
       if (products.length === 0) return 1 // Si no hay productos, empieza en 1
 
-      // Suponiendo que ordenSellout es número y está en cada producto
-      // Buscamos el máximo ordenSellout entre los productos
+      // Suponiendo que orderSellout es número y está en cada producto
+      // Buscamos el máximo orderSellout entre los productos
       const maxOrden = Math.max(
-         ...products.map((p) => Number(p.ordenSellout) || 0)
+         ...products.map((p) => Number(p.orderSellout) || 0)
       )
       return maxOrden + 1
    }
 
-   const nextOrdenSellout = getNextOrdenSellout(products)
+   const nextorderSellout = getNextorderSellout(products)
 
    const defaultFormValues: ProductForm = {
-      ordenSellout: 0,
+      orderSellout: 0,
       category: '',
       title: '',
       urlProduct: '',
@@ -106,12 +106,12 @@ export function useProductsProvider() {
    const handleHideProduct = async (product: Product) => {
       const { id } = product
 
-      // 1. Ocultar el producto y dejar su ordenSellout en null
+      // 1. Ocultar el producto y dejar su orderSellout en null
       const { error, data } = await supabase
          .from('listProducts')
          .update({
             isProductHidden: true,
-            ordenSellout: null,
+            orderSellout: null,
          })
          .eq('id', id)
          .select()
@@ -132,8 +132,8 @@ export function useProductsProvider() {
          // 3. Obtener productos visibles y reordenarlos secuencialmente
          const visiblesOrdenados = updatedAllProducts
             .filter((p) => !p.isProductHidden)
-            .sort((a, b) => (a.ordenSellout ?? 0) - (b.ordenSellout ?? 0))
-            .map((p, index) => ({ ...p, ordenSellout: index + 1 }))
+            .sort((a, b) => (a.orderSellout ?? 0) - (b.orderSellout ?? 0))
+            .map((p, index) => ({ ...p, orderSellout: index + 1 }))
 
          // 4. Upsert masivo solo con productos visibles
          const { error: upsertError } = await supabase
@@ -141,10 +141,10 @@ export function useProductsProvider() {
             .upsert(visiblesOrdenados, { onConflict: 'id' })
 
          if (upsertError) {
-            console.error('Error al actualizar ordenSellout:', upsertError)
-            Sooner({
+            console.error('Error al actualizar orderSellout:', upsertError)
+            Sonner({
                message: 'Error al reordenar productos',
-               soonerState: 'error',
+               sonnerState: 'error',
             })
             return
          }
@@ -157,9 +157,9 @@ export function useProductsProvider() {
          setAllProducts(updatedAllProducts)
          setProducts(visiblesOrdenados)
 
-         Sooner({
+         Sonner({
             message: 'Producto ocultado correctamente',
-            soonerState: 'success',
+            sonnerState: 'success',
          })
       }
    }
@@ -167,23 +167,23 @@ export function useProductsProvider() {
    const handleUnhideProduct = async (product: Product) => {
       const { id } = product
 
-      // Obtener el máximo ordenSellout entre los productos visibles
+      // Obtener el máximo orderSellout entre los productos visibles
       const { data: maxOrderData, error: maxOrderError } = await supabase
          .from('listProducts')
-         .select('ordenSellout')
+         .select('orderSellout')
          .not('isProductHidden', 'eq', true)
-         .order('ordenSellout', { ascending: false })
+         .order('orderSellout', { ascending: false })
          .limit(1)
 
       if (maxOrderError) {
-         console.error('Error obteniendo máximo ordenSellout:', maxOrderError)
+         console.error('Error obteniendo máximo orderSellout:', maxOrderError)
          return
       }
 
-      // Sacar el máximo ordenSellout, si no hay productos visibles usar 0
-      const maxOrdenSellout =
+      // Sacar el máximo orderSellout, si no hay productos visibles usar 0
+      const maxorderSellout =
          maxOrderData && maxOrderData.length > 0
-            ? maxOrderData[0].ordenSellout ?? 0
+            ? maxOrderData[0].orderSellout ?? 0
             : 0
 
       // Actualizar el producto para desocultarlo y ponerle el orden siguiente
@@ -191,7 +191,7 @@ export function useProductsProvider() {
          .from('listProducts')
          .update({
             isProductHidden: false,
-            ordenSellout: maxOrdenSellout + 1,
+            orderSellout: maxorderSellout + 1,
          })
          .eq('id', id)
          .select()
@@ -211,16 +211,16 @@ export function useProductsProvider() {
          setProducts(visibles)
          setActiveButton(VIEW_LISTADO)
 
-         Sooner({
+         Sonner({
             message: 'Producto desocultado correctamente',
-            soonerState: 'success',
+            sonnerState: 'success',
          })
       }
    }
 
    const handleAdd = () => {
       reset({
-         ordenSellout: nextOrdenSellout,
+         orderSellout: nextorderSellout,
          category: '',
          title: '',
          urlProduct: '',
@@ -249,9 +249,9 @@ export function useProductsProvider() {
             .select()
 
          if (error && error.code === '23505') {
-            Sooner({
+            Sonner({
                message: 'Este orden sellout ya existe en la lista',
-               soonerState: 'error',
+               sonnerState: 'error',
             })
             return
          }
@@ -260,9 +260,9 @@ export function useProductsProvider() {
             setProducts((prev) => [...prev, data[0]])
             setIsModalOpen(false)
             setOpenDrawer(false)
-            Sooner({
+            Sonner({
                message: 'Producto agregado correctamente',
-               soonerState: 'success',
+               sonnerState: 'success',
             })
             reset(defaultFormValues)
          }
@@ -275,7 +275,7 @@ export function useProductsProvider() {
       setIsEditing(true)
       setEditingProductId(product.id || null)
       reset({
-         ordenSellout: product.ordenSellout?.toString() || '',
+         orderSellout: product.orderSellout?.toString() || '',
          category: product.category,
          title: product.title,
          urlProduct: product.urlProduct,
@@ -301,22 +301,22 @@ export function useProductsProvider() {
          const { data: existing, error: checkError } = await supabase
             .from('listProducts')
             .select('id')
-            .eq('ordenSellout', formData.ordenSellout)
+            .eq('orderSellout', formData.orderSellout)
             .neq('id', editingProductId)
             .limit(1)
 
          if (checkError) {
-            Sooner({
+            Sonner({
                message: 'Error al validar orden sellout',
-               soonerState: 'error',
+               sonnerState: 'error',
             })
             return
          }
 
          if (existing && existing.length > 0) {
-            Sooner({
-               message: `El orden sellout "${formData.ordenSellout}" ya está asignado a otro producto`,
-               soonerState: 'error',
+            Sonner({
+               message: `El orden sellout "${formData.orderSellout}" ya está asignado a otro producto`,
+               sonnerState: 'error',
             })
             return
          }
@@ -334,14 +334,14 @@ export function useProductsProvider() {
             .select()
 
          if (error) {
-            Sooner({
+            Sonner({
                message: 'Error al actualizar producto',
-               soonerState: 'error',
+               sonnerState: 'error',
             })
          } else if (data && data.length > 0) {
-            Sooner({
+            Sonner({
                message: 'Producto actualizado correctamente',
-               soonerState: 'success',
+               sonnerState: 'success',
             })
             setProducts((prev) =>
                prev.map((p) => (p.id === editingProductId ? data[0] : p))
@@ -376,9 +376,9 @@ export function useProductsProvider() {
          )
          setProducts(filtered)
 
-         Sooner({
+         Sonner({
             message: 'Producto eliminado correctamente',
-            soonerState: 'success',
+            sonnerState: 'success',
          })
       }
    }
@@ -396,7 +396,7 @@ export function useProductsProvider() {
       setIsFormOrderSelloutOpen(true)
       setProductToMove({
          id: productInfo.id,
-         orderSellout: String(productInfo.ordenSellout),
+         orderSellout: String(productInfo.orderSellout),
          title: productInfo.title,
       })
    }

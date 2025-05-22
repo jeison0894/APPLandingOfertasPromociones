@@ -37,23 +37,23 @@ export default function Form() {
          <div className="*:not-first:mt-1 mb-3 w-full">
             <Label
                className="text-sm font-medium text-muted-foreground"
-               htmlFor="ordenSellout">
+               htmlFor="orderSellout">
                Orden Sellout
             </Label>
             <Input
                disabled
                className="peer w-full text-muted-foreground"
-               id="ordenSellout"
+               id="orderSellout"
                placeholder="Ingresa el orden sellout"
-               aria-invalid={!!errors.ordenSellout}
-               {...register('ordenSellout')}
+               aria-invalid={!!errors.orderSellout}
+               {...register('orderSellout')}
             />
-            {errors.ordenSellout && (
+            {errors.orderSellout && (
                <p
                   className="peer-aria-invalid:text-destructive mt-2 text-xs"
                   role="alert"
                   aria-live="polite">
-                  {errors.ordenSellout.message}
+                  {errors.orderSellout.message}
                </p>
             )}
          </div>
