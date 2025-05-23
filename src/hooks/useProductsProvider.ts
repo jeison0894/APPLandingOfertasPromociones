@@ -5,19 +5,22 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productFormSchema } from '@/lib/schemas/product.schema'
 import { VIEW_LISTADO } from '@/constants/views'
-import Sonner from '@/components/Sonner'
 import {
    addProduct,
+   deleteProduct,
    editProduct,
    getAllProducts,
    hasDuplicateOrderSellout,
+   upsertProducts,
 } from '@/api/products'
 import { isPostgresError } from '@/utils/errorHelpers'
 import {
    formatProductDates,
    getDefaultEditProductForm,
    getVisibleProducts,
+   reOrderOrderSellout,
 } from '@/utils/product.utils'
+import Sonner from '@/components/Sonner'
 
 export function useProductsProvider() {
    const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -122,11 +125,13 @@ export function useProductsProvider() {
 
    const handleEditProductSubmit = async (formData: ProductForm) => {
       if (!editingProductId) {
-         console.error('No hay producto seleccionado para editar')
+         Sonner({
+            message: 'No hay producto seleccionado para editar',
+            sonnerState: 'error',
+         })
          return
       }
       setIsloadingButton(true)
-
       try {
          const duplicate = await hasDuplicateOrderSellout(
             formData,
@@ -166,28 +171,35 @@ export function useProductsProvider() {
    }
 
    const handleDeleteProduct = async (productInfo: Product) => {
-      const ID = productInfo.id
-      const { error } = await supabase
-         .from('listProducts')
-         .delete()
-         .eq('id', ID)
+      const id = productInfo.id
+      if (!id) {
+         Sonner({ message: 'ID inválido', sonnerState: 'error' })
+         return
+      }
 
-      if (error) {
-         console.error('Error al eliminar:', error)
-      } else {
-         const newlist = allProducts.filter((product) => product.id !== ID)
-         setAllProducts(newlist)
+      try {
+         await deleteProduct(id)
+         const updateList = allProducts.filter((p) => p.id !== id)
+         setAllProducts(updateList)
 
-         const filtered = newlist.filter((p) =>
-            activeButton === VIEW_LISTADO
-               ? !p.isProductHidden
-               : p.isProductHidden
-         )
-         setProducts(filtered)
-
+         if (activeButton === VIEW_LISTADO) {
+            const visibleProducts = getVisibleProducts(updateList)
+            const orderedProducts = reOrderOrderSellout(visibleProducts)
+            upsertProducts(orderedProducts)
+            setProducts(orderedProducts)
+         } else {
+            const hiddenProducts = updateList.filter((p) => p.isProductHidden)
+            setProducts(hiddenProducts)
+         }
          Sonner({
             message: 'Producto eliminado correctamente',
             sonnerState: 'success',
+         })
+      } catch (error) {
+         console.error(error)
+         Sonner({
+            message: 'Error al eliminar el producto',
+            sonnerState: 'error',
          })
       }
    }

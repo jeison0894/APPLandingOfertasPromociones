@@ -42,3 +42,15 @@ export async function editProduct(
    if (error) throw error
    return data
 }
+
+export async function deleteProduct(id: string) {
+   const { error } = await supabase.from('listProducts').delete().eq('id', id)
+   if (error) throw error
+}
+
+export async function upsertProducts(products: Product[]) {
+   const { error } = await supabase
+      .from('listProducts')
+      .upsert(products, { onConflict: 'id' })
+   if (error) throw error
+}

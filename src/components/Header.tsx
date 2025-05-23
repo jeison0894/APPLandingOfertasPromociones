@@ -3,7 +3,11 @@ import DarkMode from './DarkMode'
 import MenuButton from './MenuButton'
 import { useProducts } from '@/hooks/useProducts'
 import { VIEW_LISTADO, VIEW_OCULTOS } from '@/constants/views'
-import { getHiddenProducts, getVisibleProducts } from '@/utils/product.utils'
+import {
+   getHiddenProducts,
+   getVisibleProducts,
+   reOrderOrderSellout,
+} from '@/utils/product.utils'
 
 function Header() {
    const {
@@ -30,8 +34,9 @@ function Header() {
             <MenuButton
                text={VIEW_LISTADO}
                functionOnClick={() => {
-                  const visibles = getVisibleProducts(allProducts)
-                  setProducts(visibles)
+                  const visibleProducts = getVisibleProducts(allProducts)
+                  const orderedProducts = reOrderOrderSellout(visibleProducts)
+                  setProducts(orderedProducts)
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }))
                   setActiveButton(VIEW_LISTADO)
                }}

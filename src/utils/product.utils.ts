@@ -50,3 +50,10 @@ export function getDefaultEditProductForm(product: Product) {
       isProductHidden: product.isProductHidden ?? false,
    }
 }
+
+export function reOrderOrderSellout(products: Product[]): Product[] {
+   return products
+      .slice()
+      .sort((a, b) => a.orderSellout - b.orderSellout)
+      .map((p, i) => ({ ...p, orderSellout: i + 1 }))
+}
