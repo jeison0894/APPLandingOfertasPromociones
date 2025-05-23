@@ -31,14 +31,14 @@ export function useProductsProvider() {
    const [openDrawer, setOpenDrawer] = useState(false)
    const [isEditing, setIsEditing] = useState(false)
    const [showConfirmDialog, setShowConfirmDialog] = useState(false)
-   const [editingProductId, setEditingProductId] = useState<string | null>(null)
+   const [idProductToEdit, setIdProductToEdit] = useState<string | null>(null)
    const [activeButton, setActiveButton] = useState<string>(VIEW_LISTADO)
    const [pagination, setPagination] = useState({
       pageIndex: 0,
       pageSize: 25,
    })
    const [isFormOrderSelloutOpen, setIsFormOrderSelloutOpen] = useState(false)
-   const [productToMove, setProductToMove] = useState<ProductToMove>({
+   const [productToMove, setInfoProductToMove] = useState<ProductToMove>({
       id: '',
       orderSellout: '0',
       title: '',
@@ -88,6 +88,15 @@ export function useProductsProvider() {
       setFormIsDirty(isDirty)
    }, [isDirty])
 
+   
+   const onSubmitForm = (data: ProductForm) => {
+      if (isEditing) {
+         handleEditProductSubmit(data)
+      } else {
+         handleAddProductSubmit(data)
+      }
+   }
+
    const handleAddProductSubmit = async (formData: ProductForm) => {
       setIsloadingButton(true)
       try {
@@ -118,13 +127,13 @@ export function useProductsProvider() {
 
    const handlePrepareEdit = (product: Product) => {
       setIsEditing(true)
-      setEditingProductId(product.id || null)
+      setIdProductToEdit(product.id || null)
       reset(getDefaultEditProductForm(product))
       setOpenDrawer(true)
    }
 
    const handleEditProductSubmit = async (formData: ProductForm) => {
-      if (!editingProductId) {
+      if (!idProductToEdit) {
          Sonner({
             message: 'No hay producto seleccionado para editar',
             sonnerState: 'error',
@@ -133,11 +142,11 @@ export function useProductsProvider() {
       }
       setIsloadingButton(true)
       try {
-         const duplicate = await hasDuplicateOrderSellout(
+         const hasDuplicate = await hasDuplicateOrderSellout(
             formData,
-            editingProductId
+            idProductToEdit
          )
-         if (duplicate) {
+         if (hasDuplicate) {
             Sonner({
                message: `El orden sellout "${formData.orderSellout}" ya está asignado a otro producto`,
                sonnerState: 'error',
@@ -145,19 +154,19 @@ export function useProductsProvider() {
             return
          }
          const dataToUpdate = formatProductDates(formData)
-         const updated = await editProduct(dataToUpdate, editingProductId)
-         if (updated) {
+         const productUpdated = await editProduct(dataToUpdate, idProductToEdit)
+         if (productUpdated) {
             Sonner({
                message: 'Producto actualizado correctamente',
                sonnerState: 'success',
             })
             setProducts((prev) =>
-               prev.map((p) => (p.id === editingProductId ? updated[0] : p))
+               prev.map((p) => (p.id === idProductToEdit ? productUpdated[0] : p))
             )
             setIsEditing(false)
             setOpenDrawer(false)
             reset(defaultFormValues)
-            setEditingProductId(null)
+            setIdProductToEdit(null)
          }
       } catch (error) {
          Sonner({
@@ -319,25 +328,17 @@ export function useProductsProvider() {
       }
    }
 
-   const onSubmit = (data: ProductForm) => {
-      if (isEditing) {
-         handleEditProductSubmit(data)
-      } else {
-         handleAddProductSubmit(data)
-      }
-   }
-
-   const handleMoveProduct = (productInfo: Product) => {
+   const handleChangeOrderSelloutForm = (productInfo: Product) => {
       setOpenDrawer(true)
       setIsFormOrderSelloutOpen(true)
-      setProductToMove({
+      setInfoProductToMove({
          id: productInfo.id,
          orderSellout: String(productInfo.orderSellout),
          title: productInfo.title,
       })
    }
 
-   const handleBackdropClick = () => {
+   const handleBackdropDrawerClick = () => {
       if (formIsDirty) {
          setShowConfirmDialog(true)
       } else {
@@ -377,13 +378,13 @@ export function useProductsProvider() {
       handleUnhideProduct,
       pagination,
       setPagination,
-      onSubmit,
+      onSubmitForm,
       isFormOrderSelloutOpen,
       setIsFormOrderSelloutOpen,
-      handleMoveProduct,
+      handleChangeOrderSelloutForm,
       productToMove,
       setAllProducts,
-      handleBackdropClick,
+      handleBackdropDrawerClick,
       setFormIsDirty,
       allProducts,
    }

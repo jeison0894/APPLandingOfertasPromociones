@@ -25,11 +25,11 @@ export default function Form() {
       Controller,
       control,
       isEditing,
-      onSubmit,
+      onSubmitForm,
    } = useProducts()
 
    return (
-      <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+      <form className="space-y-5" onSubmit={handleSubmit(onSubmitForm)}>
          <h3 className="mb-5 font-bold border-b-1 pb-3">
             {isEditing ? 'Editar Producto' : 'Agregar Producto'}
          </h3>

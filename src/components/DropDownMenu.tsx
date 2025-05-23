@@ -32,7 +32,7 @@ export default function DropDownMenu({ productInfo }: Props) {
       handleHideProduct,
       activeButton,
       handleUnhideProduct,
-      handleMoveProduct,
+      handleChangeOrderSelloutForm,
    } = useProducts()
    const [open, setOpen] = useState(false)
 
@@ -61,13 +61,13 @@ export default function DropDownMenu({ productInfo }: Props) {
                      Editar
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                     onClick={() => handleMoveProduct(productInfo)}>
+                     onClick={() => handleChangeOrderSelloutForm(productInfo)}>
                      Mover
                   </DropdownMenuItem>
                   <DropdownMenuItem
                      onClick={() => handleHideProduct(productInfo)}>
                      Ocultar
-                  </DropdownMenuItem>{' '}
+                  </DropdownMenuItem>
                </>
             ) : (
                <DropdownMenuItem

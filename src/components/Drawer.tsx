@@ -8,7 +8,7 @@ type DrawerProps = {
 }
 
 export function Drawer({ isOpen, children }: DrawerProps) {
-   const { handleBackdropClick } = useProducts()
+   const { handleBackdropDrawerClick } = useProducts()
 
    useEffect(() => {
       if (isOpen) {
@@ -24,7 +24,7 @@ export function Drawer({ isOpen, children }: DrawerProps) {
    return (
       <>
          <div
-            onClick={handleBackdropClick}
+            onClick={handleBackdropDrawerClick}
             className={`fixed inset-0 z-40 bg-black transition-opacity duration-300 ${
                isOpen ? 'opacity-70' : 'opacity-0 pointer-events-none'
             }`}></div>
