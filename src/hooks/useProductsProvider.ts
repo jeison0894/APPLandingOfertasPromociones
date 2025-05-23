@@ -88,7 +88,6 @@ export function useProductsProvider() {
       setFormIsDirty(isDirty)
    }, [isDirty])
 
-   
    const onSubmitForm = (data: ProductForm) => {
       if (isEditing) {
          handleEditProductSubmit(data)
@@ -102,6 +101,7 @@ export function useProductsProvider() {
       try {
          const dataToSend = formatProductDates(formData)
          const data = await addProduct(dataToSend)
+         setAllProducts((prev) => [...prev, data[0]])
          setProducts((prev) => [...prev, data[0]])
          setIsModalOpen(false)
          setOpenDrawer(false)
@@ -161,7 +161,9 @@ export function useProductsProvider() {
                sonnerState: 'success',
             })
             setProducts((prev) =>
-               prev.map((p) => (p.id === idProductToEdit ? productUpdated[0] : p))
+               prev.map((p) =>
+                  p.id === idProductToEdit ? productUpdated[0] : p
+               )
             )
             setIsEditing(false)
             setOpenDrawer(false)
