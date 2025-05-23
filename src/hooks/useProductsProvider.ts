@@ -4,13 +4,20 @@ import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productFormSchema } from '@/lib/schemas/product.schema'
-import { parseDate } from '@internationalized/date'
 import { VIEW_LISTADO } from '@/constants/views'
 import Sonner from '@/components/Sonner'
-import { addProduct, getAllProducts } from '@/api/products'
+import {
+   addProduct,
+   editProduct,
+   getAllProducts,
+   hasDuplicateOrderSellout,
+} from '@/api/products'
 import { isPostgresError } from '@/utils/errorHelpers'
-import { formatDateToISO } from '@/utils/formatDate'
-import { formatProductDates, getVisibleProducts } from '@/utils/product.utils'
+import {
+   formatProductDates,
+   getDefaultEditProductForm,
+   getVisibleProducts,
+} from '@/utils/product.utils'
 
 export function useProductsProvider() {
    const [allProducts, setAllProducts] = useState<Product[]>([])
@@ -103,6 +110,85 @@ export function useProductsProvider() {
          }
       } finally {
          setIsloadingButton(false)
+      }
+   }
+
+   const handlePrepareEdit = (product: Product) => {
+      setIsEditing(true)
+      setEditingProductId(product.id || null)
+      reset(getDefaultEditProductForm(product))
+      setOpenDrawer(true)
+   }
+
+   const handleEditProductSubmit = async (formData: ProductForm) => {
+      if (!editingProductId) {
+         console.error('No hay producto seleccionado para editar')
+         return
+      }
+      setIsloadingButton(true)
+
+      try {
+         const duplicate = await hasDuplicateOrderSellout(
+            formData,
+            editingProductId
+         )
+         if (duplicate) {
+            Sonner({
+               message: `El orden sellout "${formData.orderSellout}" ya está asignado a otro producto`,
+               sonnerState: 'error',
+            })
+            return
+         }
+         const dataToUpdate = formatProductDates(formData)
+         const updated = await editProduct(dataToUpdate, editingProductId)
+         if (updated) {
+            Sonner({
+               message: 'Producto actualizado correctamente',
+               sonnerState: 'success',
+            })
+            setProducts((prev) =>
+               prev.map((p) => (p.id === editingProductId ? updated[0] : p))
+            )
+            setIsEditing(false)
+            setOpenDrawer(false)
+            reset(defaultFormValues)
+            setEditingProductId(null)
+         }
+      } catch (error) {
+         Sonner({
+            message: 'Ocurrió un error al editar el producto',
+            sonnerState: 'error',
+         })
+         console.error(error)
+      } finally {
+         setIsloadingButton(false)
+      }
+   }
+
+   const handleDeleteProduct = async (productInfo: Product) => {
+      const ID = productInfo.id
+      const { error } = await supabase
+         .from('listProducts')
+         .delete()
+         .eq('id', ID)
+
+      if (error) {
+         console.error('Error al eliminar:', error)
+      } else {
+         const newlist = allProducts.filter((product) => product.id !== ID)
+         setAllProducts(newlist)
+
+         const filtered = newlist.filter((p) =>
+            activeButton === VIEW_LISTADO
+               ? !p.isProductHidden
+               : p.isProductHidden
+         )
+         setProducts(filtered)
+
+         Sonner({
+            message: 'Producto eliminado correctamente',
+            sonnerState: 'success',
+         })
       }
    }
 
@@ -221,121 +307,9 @@ export function useProductsProvider() {
       }
    }
 
-   const handlePrepareEdit = (product: Product) => {
-      setIsEditing(true)
-      setEditingProductId(product.id || null)
-      reset({
-         orderSellout: product.orderSellout?.toString() || '',
-         category: product.category,
-         title: product.title,
-         urlProduct: product.urlProduct,
-         urlImage: product.urlImage,
-         startDate: product.startDate
-            ? parseDate(product.startDate)
-            : undefined,
-         endDate: product.endDate ? parseDate(product.endDate) : undefined,
-         offerState: product.offerState,
-         isProductHidden: product.isProductHidden ?? false,
-      })
-      setOpenDrawer(true)
-   }
-
-   const handleEdit = async (formData: ProductForm) => {
-      if (!editingProductId) {
-         console.error('No hay producto seleccionado para editar')
-         return
-      }
-
-      setIsloadingButton(true)
-      try {
-         const { data: existing, error: checkError } = await supabase
-            .from('listProducts')
-            .select('id')
-            .eq('orderSellout', formData.orderSellout)
-            .neq('id', editingProductId)
-            .limit(1)
-
-         if (checkError) {
-            Sonner({
-               message: 'Error al validar orden sellout',
-               sonnerState: 'error',
-            })
-            return
-         }
-
-         if (existing && existing.length > 0) {
-            Sonner({
-               message: `El orden sellout "${formData.orderSellout}" ya está asignado a otro producto`,
-               sonnerState: 'error',
-            })
-            return
-         }
-
-         const dataToUpdate = {
-            ...formData,
-            startDate: formatDateToISO(formData.startDate),
-            endDate: formatDateToISO(formData.endDate),
-         }
-
-         const { data, error } = await supabase
-            .from('listProducts')
-            .update(dataToUpdate)
-            .eq('id', editingProductId)
-            .select()
-
-         if (error) {
-            Sonner({
-               message: 'Error al actualizar producto',
-               sonnerState: 'error',
-            })
-         } else if (data && data.length > 0) {
-            Sonner({
-               message: 'Producto actualizado correctamente',
-               sonnerState: 'success',
-            })
-            setProducts((prev) =>
-               prev.map((p) => (p.id === editingProductId ? data[0] : p))
-            )
-            setIsEditing(false)
-            setOpenDrawer(false)
-            reset(defaultFormValues)
-            setEditingProductId(null)
-         }
-      } finally {
-         setIsloadingButton(false)
-      }
-   }
-
-   const handleDeleteProduct = async (productInfo: Product) => {
-      const ID = productInfo.id
-      const { error } = await supabase
-         .from('listProducts')
-         .delete()
-         .eq('id', ID)
-
-      if (error) {
-         console.error('Error al eliminar:', error)
-      } else {
-         const newlist = allProducts.filter((product) => product.id !== ID)
-         setAllProducts(newlist)
-
-         const filtered = newlist.filter((p) =>
-            activeButton === VIEW_LISTADO
-               ? !p.isProductHidden
-               : p.isProductHidden
-         )
-         setProducts(filtered)
-
-         Sonner({
-            message: 'Producto eliminado correctamente',
-            sonnerState: 'success',
-         })
-      }
-   }
-
    const onSubmit = (data: ProductForm) => {
       if (isEditing) {
-         handleEdit(data)
+         handleEditProductSubmit(data)
       } else {
          handleAddProductSubmit(data)
       }
@@ -366,7 +340,7 @@ export function useProductsProvider() {
       setProducts,
       handleAddProductSubmit,
       handlePrepareEdit,
-      handleEdit,
+      handleEditProductSubmit,
       handleDeleteProduct,
       isLoading,
       isloadingButton,

@@ -1,5 +1,6 @@
 import type { Product, ProductForm } from '@/types/product'
 import { formatDateToISO } from './formatDate'
+import { parseDate } from '@internationalized/date'
 
 export function getVisibleProducts(products: Product[]) {
    return products.filter((p) => !p.isProductHidden)
@@ -33,5 +34,19 @@ export function getDefaultAddProductForm(nextorderSellout: number) {
       endDate: undefined,
       offerState: '',
       isProductHidden: false,
+   }
+}
+
+export function getDefaultEditProductForm(product: Product) {
+   return {
+      orderSellout: product.orderSellout?.toString() || '',
+      category: product.category,
+      title: product.title,
+      urlProduct: product.urlProduct,
+      urlImage: product.urlImage,
+      startDate: product.startDate ? parseDate(product.startDate) : undefined,
+      endDate: product.endDate ? parseDate(product.endDate) : undefined,
+      offerState: product.offerState,
+      isProductHidden: product.isProductHidden ?? false,
    }
 }
