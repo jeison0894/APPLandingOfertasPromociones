@@ -51,7 +51,7 @@ export function getDefaultEditProductForm(product: Product) {
    }
 }
 
-export function reOrderOrderSellout(products: Product[]): Product[] {
+export function reorderOrderSellout(products: Product[]): Product[] {
    return products
       .slice()
       .sort((a, b) => a.orderSellout - b.orderSellout)

@@ -11,6 +11,7 @@ import {
    editProduct,
    getAllProducts,
    hasDuplicateOrderSellout,
+   hideProduct,
    upsertProducts,
 } from '@/api/products'
 import { isPostgresError } from '@/utils/errorHelpers'
@@ -18,7 +19,7 @@ import {
    formatProductDates,
    getDefaultEditProductForm,
    getVisibleProducts,
-   reOrderOrderSellout,
+   reorderOrderSellout,
 } from '@/utils/product.utils'
 import Sonner from '@/components/Sonner'
 
@@ -195,8 +196,8 @@ export function useProductsProvider() {
 
          if (activeButton === VIEW_LISTADO) {
             const visibleProducts = getVisibleProducts(updateList)
-            const orderedProducts = reOrderOrderSellout(visibleProducts)
-            upsertProducts(orderedProducts)
+            const orderedProducts = reorderOrderSellout(visibleProducts)
+            await upsertProducts(orderedProducts)
             setProducts(orderedProducts)
          } else {
             const hiddenProducts = updateList.filter((p) => p.isProductHidden)
@@ -216,62 +217,34 @@ export function useProductsProvider() {
    }
 
    const handleHideProduct = async (product: Product) => {
-      const { id } = product
-
-      // 1. Ocultar el producto y dejar su orderSellout en null
-      const { error, data } = await supabase
-         .from('listProducts')
-         .update({
-            isProductHidden: true,
-            orderSellout: null,
+      const id = product.id
+      if (!id) {
+         Sonner({
+            message: 'No hay producto seleccionado para ocultar',
+            sonnerState: 'error',
          })
-         .eq('id', id)
-         .select()
-
-      if (error) {
-         console.error('Error al ocultar producto:', error)
          return
       }
 
-      if (data && data.length > 0) {
-         const updatedProduct = data[0]
-
-         // 2. Actualizar localmente allProducts
-         let updatedAllProducts = allProducts.map((p) =>
-            p.id === id ? updatedProduct : p
+      try {
+         const [hiddenProduct] = await hideProduct(id)
+         const updateList = allProducts.map((p) =>
+            p.id === id ? hiddenProduct : p
          )
-
-         // 3. Obtener productos visibles y reordenarlos secuencialmente
-         const visiblesOrdenados = updatedAllProducts
-            .filter((p) => !p.isProductHidden)
-            .sort((a, b) => (a.orderSellout ?? 0) - (b.orderSellout ?? 0))
-            .map((p, index) => ({ ...p, orderSellout: index + 1 }))
-
-         // 4. Upsert masivo solo con productos visibles
-         const { error: upsertError } = await supabase
-            .from('listProducts')
-            .upsert(visiblesOrdenados, { onConflict: 'id' })
-
-         if (upsertError) {
-            console.error('Error al actualizar orderSellout:', upsertError)
-            Sonner({
-               message: 'Error al reordenar productos',
-               sonnerState: 'error',
-            })
-            return
-         }
-
-         // 5. Unir visibles actualizados + ocultos
-         const ocultos = updatedAllProducts.filter((p) => p.isProductHidden)
-         updatedAllProducts = [...visiblesOrdenados, ...ocultos]
-
-         // 6. Actualizar estados
-         setAllProducts(updatedAllProducts)
-         setProducts(visiblesOrdenados)
-
+         const visibleProducts = getVisibleProducts(updateList)
+         const orderedProducts = reorderOrderSellout(visibleProducts)
+         await upsertProducts(orderedProducts)
+         setAllProducts(updateList)
+         setProducts(orderedProducts)
          Sonner({
             message: 'Producto ocultado correctamente',
             sonnerState: 'success',
+         })
+      } catch (error) {
+         console.error(error)
+         Sonner({
+            message: 'Error al ocultar el producto',
+            sonnerState: 'error',
          })
       }
    }
@@ -313,13 +286,13 @@ export function useProductsProvider() {
       } else if (data && data.length > 0) {
          const updatedProduct = data[0]
          // Actualizar el estado global allProducts con el producto actualizado
-         const updatedAllProducts = allProducts.map((p) =>
+         const updateList = allProducts.map((p) =>
             p.id === id ? updatedProduct : p
          )
-         setAllProducts(updatedAllProducts)
+         setAllProducts(updateList)
 
          // Mostrar solo los productos visibles actualizados
-         const visibles = updatedAllProducts.filter((p) => !p.isProductHidden)
+         const visibles = updateList.filter((p) => !p.isProductHidden)
          setProducts(visibles)
          setActiveButton(VIEW_LISTADO)
 

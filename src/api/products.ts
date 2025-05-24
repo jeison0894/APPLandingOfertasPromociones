@@ -54,3 +54,16 @@ export async function upsertProducts(products: Product[]) {
       .upsert(products, { onConflict: 'id' })
    if (error) throw error
 }
+
+export async function hideProduct(id: string) {
+   const { data, error } = await supabase
+      .from('listProducts')
+      .update({
+         isProductHidden: true,
+         orderSellout: null,
+      })
+      .eq('id', id)
+      .select()
+   if (error) throw error
+   return data
+}

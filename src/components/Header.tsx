@@ -6,7 +6,7 @@ import { VIEW_LISTADO, VIEW_OCULTOS } from '@/constants/views'
 import {
    getHiddenProducts,
    getVisibleProducts,
-   reOrderOrderSellout,
+   reorderOrderSellout,
 } from '@/utils/product.utils'
 
 function Header() {
@@ -35,7 +35,7 @@ function Header() {
                text={VIEW_LISTADO}
                functionOnClick={() => {
                   const visibleProducts = getVisibleProducts(allProducts)
-                  const orderedProducts = reOrderOrderSellout(visibleProducts)
+                  const orderedProducts = reorderOrderSellout(visibleProducts)
                   setProducts(orderedProducts)
                   setPagination((prev) => ({ ...prev, pageIndex: 0 }))
                   setActiveButton(VIEW_LISTADO)
