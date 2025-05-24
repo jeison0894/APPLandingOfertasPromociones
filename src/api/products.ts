@@ -68,6 +68,19 @@ export async function hideProduct(id: string) {
    return data
 }
 
+export async function getMaxOrderSellout(): Promise<number> {
+   const { data, error } = await supabase
+      .from('listProducts')
+      .select('orderSellout')
+      .not('isProductHidden', 'eq', true)
+      .order('orderSellout', { ascending: false })
+      .limit(1)
+
+   if (error) throw error
+
+   return data?.[0]?.orderSellout ?? 0
+}
+
 export async function unhideProduct(
    maxOrderSellout: number,
    id: string

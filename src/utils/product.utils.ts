@@ -1,7 +1,6 @@
 import type { Product, ProductForm } from '@/types/product'
 import { formatDateToISO } from './formatDate'
 import { parseDate } from '@internationalized/date'
-import supabase from './supabase'
 
 export function getVisibleProducts(products: Product[]) {
    return products.filter((p) => !p.isProductHidden)
@@ -79,19 +78,6 @@ export function updateAllProducts(
    product: Product
 ): Product[] {
    return products.map((p) => (p.id === idProduct ? product : p))
-}
-
-export async function getMaxOrderSellout(): Promise<number> {
-   const { data, error } = await supabase
-      .from('listProducts')
-      .select('orderSellout')
-      .not('isProductHidden', 'eq', true)
-      .order('orderSellout', { ascending: false })
-      .limit(1)
-
-   if (error) throw error
-
-   return data?.[0]?.orderSellout ?? 0
 }
 
 export function moveProductToEnd(
