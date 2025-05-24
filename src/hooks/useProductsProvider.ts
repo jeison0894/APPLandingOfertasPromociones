@@ -1,5 +1,4 @@
 import type { Product, ProductForm, ProductToMove } from '@/types/product'
-import supabase from '@/utils/supabase'
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,13 +11,16 @@ import {
    getAllProducts,
    hasDuplicateOrderSellout,
    hideProduct,
+   unhideProduct,
    upsertProducts,
 } from '@/api/products'
 import { isPostgresError } from '@/utils/errorHelpers'
 import {
    formatProductDates,
    getDefaultEditProductForm,
+   getMaxOrderSellout,
    getVisibleProducts,
+   moveProductToEnd,
    reorderOrderSellout,
 } from '@/utils/product.utils'
 import Sonner from '@/components/Sonner'
@@ -251,54 +253,32 @@ export function useProductsProvider() {
 
    const handleUnhideProduct = async (product: Product) => {
       const { id } = product
-
-      // Obtener el máximo orderSellout entre los productos visibles
-      const { data: maxOrderData, error: maxOrderError } = await supabase
-         .from('listProducts')
-         .select('orderSellout')
-         .not('isProductHidden', 'eq', true)
-         .order('orderSellout', { ascending: false })
-         .limit(1)
-
-      if (maxOrderError) {
-         console.error('Error obteniendo máximo orderSellout:', maxOrderError)
+      if (!id) {
+         Sonner({
+            message: 'No hay producto seleccionado para desocultar',
+            sonnerState: 'error',
+         })
          return
       }
 
-      // Sacar el máximo orderSellout, si no hay productos visibles usar 0
-      const maxorderSellout =
-         maxOrderData && maxOrderData.length > 0
-            ? maxOrderData[0].orderSellout ?? 0
-            : 0
-
-      // Actualizar el producto para desocultarlo y ponerle el orden siguiente
-      const { error, data } = await supabase
-         .from('listProducts')
-         .update({
-            isProductHidden: false,
-            orderSellout: maxorderSellout + 1,
-         })
-         .eq('id', id)
-         .select()
-
-      if (error) {
-         console.error('Error al desocultar producto:', error)
-      } else if (data && data.length > 0) {
-         const updatedProduct = data[0]
-         // Actualizar el estado global allProducts con el producto actualizado
-         const updateList = allProducts.map((p) =>
-            p.id === id ? updatedProduct : p
-         )
-         setAllProducts(updateList)
-
-         // Mostrar solo los productos visibles actualizados
-         const visibles = updateList.filter((p) => !p.isProductHidden)
-         setProducts(visibles)
+      try {
+         const maxOrderSellout = await getMaxOrderSellout()
+         const unhiddenProduct = await unhideProduct(maxOrderSellout, id)
+         const updatedList = moveProductToEnd(allProducts, id, unhiddenProduct)
+         const visibles = getVisibleProducts(updatedList)
+         const orderedProducts = reorderOrderSellout(visibles)
+         setAllProducts(updatedList)
+         setProducts(orderedProducts)
          setActiveButton(VIEW_LISTADO)
-
          Sonner({
             message: 'Producto desocultado correctamente',
             sonnerState: 'success',
+         })
+      } catch (error) {
+         console.error(error)
+         Sonner({
+            message: 'Error al desocultar el producto',
+            sonnerState: 'error',
          })
       }
    }
