@@ -28,7 +28,7 @@ type Props = { productInfo: Product }
 export default function DropDownMenu({ productInfo }: Props) {
    const {
       handleDeleteProduct,
-      handlePrepareEdit,
+      handlePrepareEditForm,
       handleHideProduct,
       activeButton,
       handleUnhideProduct,
@@ -57,7 +57,7 @@ export default function DropDownMenu({ productInfo }: Props) {
             {activeButton === VIEW_LISTADO ? (
                <>
                   <DropdownMenuItem
-                     onClick={() => handlePrepareEdit(productInfo)}>
+                     onClick={() => handlePrepareEditForm(productInfo)}>
                      Editar
                   </DropdownMenuItem>
                   <DropdownMenuItem

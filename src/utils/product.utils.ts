@@ -38,6 +38,20 @@ export function getDefaultAddProductForm(nextorderSellout: number) {
    }
 }
 
+export function getDefaultResetForm() {
+   return {
+      orderSellout: 0,
+      category: '',
+      title: '',
+      urlProduct: '',
+      urlImage: '',
+      startDate: undefined,
+      endDate: undefined,
+      offerState: '',
+      isProductHidden: false,
+   }
+}
+
 export function getDefaultEditProductForm(product: Product) {
    return {
       orderSellout: product.orderSellout?.toString() || '',

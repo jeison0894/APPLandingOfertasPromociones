@@ -18,6 +18,7 @@ import { isPostgresError } from '@/utils/errorHelpers'
 import {
    formatProductDates,
    getDefaultEditProductForm,
+   getDefaultResetForm,
    getMaxOrderSellout,
    getVisibleProducts,
    moveProductToEnd,
@@ -33,8 +34,8 @@ export function useProductsProvider() {
    const [isModalOpen, setIsModalOpen] = useState(false)
    const [openDrawer, setOpenDrawer] = useState(false)
    const [isEditing, setIsEditing] = useState(false)
-   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
    const [idProductToEdit, setIdProductToEdit] = useState<string | null>(null)
+   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
    const [activeButton, setActiveButton] = useState<string>(VIEW_LISTADO)
    const [pagination, setPagination] = useState({
       pageIndex: 0,
@@ -48,18 +49,6 @@ export function useProductsProvider() {
    })
    const [formIsDirty, setFormIsDirty] = useState<boolean>(false)
 
-   const defaultFormValues: ProductForm = {
-      orderSellout: 0,
-      category: '',
-      title: '',
-      urlProduct: '',
-      urlImage: '',
-      startDate: undefined,
-      endDate: undefined,
-      offerState: '',
-      isProductHidden: false,
-   }
-
    const {
       register,
       handleSubmit,
@@ -69,7 +58,7 @@ export function useProductsProvider() {
    } = useForm<ProductForm>({
       resolver: zodResolver(productFormSchema),
       mode: 'onChange',
-      defaultValues: defaultFormValues,
+      defaultValues: getDefaultResetForm(),
    })
 
    useEffect(() => {
@@ -93,13 +82,13 @@ export function useProductsProvider() {
 
    const onSubmitForm = (data: ProductForm) => {
       if (isEditing) {
-         handleEditProductSubmit(data)
+         handleEditProduct(data)
       } else {
-         handleAddProductSubmit(data)
+         handleAddProduct(data)
       }
    }
 
-   const handleAddProductSubmit = async (formData: ProductForm) => {
+   const handleAddProduct = async (formData: ProductForm) => {
       setIsloadingButton(true)
       try {
          const dataToSend = formatProductDates(formData)
@@ -128,14 +117,14 @@ export function useProductsProvider() {
       }
    }
 
-   const handlePrepareEdit = (product: Product) => {
+   const handlePrepareEditForm = (product: Product) => {
       setIsEditing(true)
       setIdProductToEdit(product.id || null)
       reset(getDefaultEditProductForm(product))
       setOpenDrawer(true)
    }
 
-   const handleEditProductSubmit = async (formData: ProductForm) => {
+   const handleEditProduct = async (formData: ProductForm) => {
       if (!idProductToEdit) {
          Sonner({
             message: 'No hay producto seleccionado para editar',
@@ -170,7 +159,7 @@ export function useProductsProvider() {
             )
             setIsEditing(false)
             setOpenDrawer(false)
-            reset(defaultFormValues)
+            reset(getDefaultResetForm())
             setIdProductToEdit(null)
          }
       } catch (error) {
@@ -304,43 +293,43 @@ export function useProductsProvider() {
    }
 
    return {
+      allProducts,
+      setAllProducts,
       products,
       setProducts,
-      handleAddProductSubmit,
-      handlePrepareEdit,
-      handleEditProductSubmit,
+      handleAddProduct,
+      handlePrepareEditForm,
+      handleEditProduct,
       handleDeleteProduct,
-      isLoading,
-      isloadingButton,
-      errors,
+      handleHideProduct,
+      handleUnhideProduct,
       register,
       handleSubmit,
       Controller,
       control,
+      onSubmitForm,
+      reset,
+      isDirty,
+      setFormIsDirty,
+      errors,
+      isLoading,
+      isloadingButton,
       isModalOpen,
       setIsModalOpen,
       openDrawer,
       setOpenDrawer,
+      handleBackdropDrawerClick,
       isEditing,
       setIsEditing,
-      reset,
-      isDirty,
       showConfirmDialog,
       setShowConfirmDialog,
-      handleHideProduct,
       activeButton,
       setActiveButton,
-      handleUnhideProduct,
       pagination,
       setPagination,
-      onSubmitForm,
       isFormOrderSelloutOpen,
       setIsFormOrderSelloutOpen,
-      handleChangeOrderSelloutForm,
       productToMove,
-      setAllProducts,
-      handleBackdropDrawerClick,
-      setFormIsDirty,
-      allProducts,
+      handleChangeOrderSelloutForm,
    }
 }
